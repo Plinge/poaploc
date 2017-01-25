@@ -13,7 +13,7 @@
 
 #include "floatwave.h"
 #include "math.h"
-#include <malloc.h>
+// #include <malloc.h>
 #include <memory.h>
 #include <qdebug.h>
 #include <limits>

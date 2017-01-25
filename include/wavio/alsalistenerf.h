@@ -1,5 +1,6 @@
 #pragma once
 #ifndef WINVER
+#ifdef HAVE_ALSA
 #include <alsa/asoundlib.h>
 #include "listenerthreadf.h"
 
@@ -44,4 +45,5 @@ private:
   int readCount;
 };
 
+#endif
 #endif

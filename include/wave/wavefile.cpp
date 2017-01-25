@@ -13,7 +13,7 @@
 
 #include "wavefile.h"
 #include "floatwave.h"
-#include <malloc.h>
+// #include <malloc.h>
 #include <QFile>
 #include <QDebug>
 

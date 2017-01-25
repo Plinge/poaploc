@@ -1,6 +1,6 @@
 //#include "stdafx.h"
 #include "math.h"
-#include <malloc.h>
+// #include <malloc.h>
 #include <stdexcept>
 #include "delayfilter.h"
 
