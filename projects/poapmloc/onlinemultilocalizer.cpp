@@ -535,7 +535,6 @@ void OlineMultiLocalizer::calc(float *data, bool continued)
                 for (std::list<LocalizedSpectrum>::iterator it=res.begin(); it != res.end(); ++it) {
                     LocalizedSpectrum spec = *it;
 					double s = spec.getSpectralSum();
-					assert( s > 1e-9);
 					if (s<=0.0) continue;
                     double t = spec.getTime();
                     cout << t + timeOffset << "\t" << arrayIndex + arrayOffset << "\t";

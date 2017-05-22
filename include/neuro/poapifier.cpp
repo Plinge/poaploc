@@ -372,7 +372,14 @@ void PoAPifier::setSpikes(double pre,double len,double gain,double th,double tha
     spike->setRelativeThreshold(th);
     spike->setEnergyThreshold(tha);
     spike->setGain(gain);
-    spike->setHalfway(mode==1);
+    spike->setHalfway(mode&1 == 1);
+    if (mode <3) {
+        spike->setMode(Neuro::SpikeGeneratorPoaPrecedence::POAP);
+    } else if (mode < 5) {
+        spike->setMode(Neuro::SpikeGeneratorPoaPrecedence::ZC);
+    } else {
+        spike->setMode(Neuro::SpikeGeneratorPoaPrecedence::HWR);
+    }
     spikers.append( QSharedPointer<Neuro::SpikeGeneratorPoaPrecedence>(spike) );
 }
 

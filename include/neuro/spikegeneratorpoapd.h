@@ -14,6 +14,14 @@ namespace Neuro {
  */
 class SpikeGeneratorPoaPrecedence : public  SpikeGenerator
 {
+
+public:
+    typedef enum {
+       POAP=0,
+       ZC=1,
+       HWR=2
+    } Mode;
+
 protected:
 	double averageTime;
 	double energyThreshold;
@@ -22,7 +30,7 @@ protected:
 	double relativeThreshold;
 	double precedence;
     bool half;
-	//
+    Mode mode;
 	double sum;
 	double poaold;
 	int indexMax;
@@ -39,6 +47,7 @@ protected:
 		relativeThreshold=other.relativeThreshold;
 		precedence=other.precedence;
         half=other.half;		
+        mode=other.mode;
 	}
 
 
@@ -46,7 +55,7 @@ protected:
 public:
     SpikeGeneratorPoaPrecedence(double avg=28.0,double pr=3.0,double th=0.05,double rth=0.0)
 		: averageTime(avg), energyThreshold(th),  energyFactor(0.05), energyExponent(0.5), 
-          relativeThreshold(rth), precedence(pr), half(false), histogram(0)
+          relativeThreshold(rth), precedence(pr), half(false), histogram(0), mode(POAP)
 	{
 		reset();
         //log();
@@ -135,6 +144,11 @@ public:
         half = b;
     }     
 
+    virtual void setMode(Mode m)
+    {
+        mode = m;
+    }
+
 	virtual void setEnergyThreshold(double e) 
 	{
 		energyThreshold=e;
@@ -161,6 +175,44 @@ public:
 
     inline void update(Audio::Wave &out, int channelIndex, int sampleIndex, double v, double a)
     {
+        if (mode == ZC) {
+            if (v<0) {
+                if (poaold>=0 && !half) {
+                     double spike = sum * energyFactor * 2.0;
+                     out.setSample(sampleIndex, channelIndex, spike);
+                     sum=0.0;
+                }
+            } else {
+                if (poaold<0) {
+                    double spike = sum * energyFactor * 2.0;
+                    out.setSample(sampleIndex, channelIndex, spike);
+                    sum=0.0;
+                    if (histogram) {
+                        histogram->update(spike>0 ? 20.0*log10(spike): -360.0);
+                    }
+                }
+            }
+            poaold = v;
+            sum += pow(v/32768.0,energyExponent);
+            return;
+        }
+
+        if (mode == HWR) {
+            if (v>0) {
+                double spike = pow(v/32768.0,energyExponent) * energyFactor * 2.0;
+                out.setSample(sampleIndex, channelIndex, spike);
+                if (v>poaMax) {
+                    poaMax = v;
+                } else {
+                    if (histogram) {
+                        histogram->update(spike>0 ? 20.0*log10(spike): -360.0);
+                    }
+                }
+            } else {
+                poaMax=0;
+            }
+            return;
+        }
 
         double av = half ? (v>0.0?v:0) : fabs(v);
         double poa = av - a;
@@ -171,7 +223,7 @@ public:
         if (poa <= 0) {
             if (poaold >= 0 && sum >= energyThreshold && poaMax > 0) {
                 double spike = sum * energyFactor * 2.0;
-                //if (spike>1.0) spike=1.0;
+
                 out.setSample(indexMax, channelIndex, spike);
                 if (histogram) {
                     histogram->update(spike>0 ? 20.0*log10(spike): -360.0);

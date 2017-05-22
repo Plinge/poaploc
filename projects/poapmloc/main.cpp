@@ -69,8 +69,8 @@ int main(int argc, char *argv[])
     options.addOption(0, "spike-avg", &spikeAverage);
     double spikePrecedence=3.0;
     options.addOption(0, "spike-pre", &spikePrecedence);
-    bool spikeHalf=false;
-    options.addSwitch(0,"spike-half",&spikeHalf);
+    int spikeMode=1;
+    options.addOption(0,"spike-mode",&spikeMode);
     double spikeGain = 4.0;
     options.addOption(0,"spike-gain",&spikeGain);
     double precision=3.0;
@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
             p->setSamplingFrequency(samplingFrequnecy);
             p->setGain(static_cast<PoAPLocalizer::GainMode>(gainMode),gainSmooth,gainMax);
             p->setFilter(bandCount,loFreq,hiFreq,gain,bandwidth);
-            p->setSpikes(spikePrecedence,spikeAverage,spikeGain,relativeSpikeThreshold,absoluteSpikeThreshold,spikeHalf?1:2);
+            p->setSpikes(spikePrecedence,spikeAverage,spikeGain,relativeSpikeThreshold,absoluteSpikeThreshold,spikeMode);
             p->setCorrelationFraming(wlen,step);
             p->setBackpro(precision, rotation, elevation-elevationMin, precision2, !noBpInter, elevationMin);
             p->setCombination(gamma);

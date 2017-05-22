@@ -1,9 +1,14 @@
 #
 #
 #
+macx {
+QMAKE_MAC_SDK = macosx10.12
+}
 
 # adapt the follwing where necessary
-MAC_INCLUDE = /Users/pli/homebrew/opt/gcc-fftw3/include
+MAC_INCLUDE =  /Users/pli/homebrew/opt/gcc-fftw3/include
+#/Users/pli/local/include
+#/Users/pli/homebrew/Cellar/gcc/6.3.0_1/include/c++/6.3.0
 MAC_LIBS = -L/Users/pli/homebrew/opt/gcc-fftw3/lib
 
 macx {
@@ -15,6 +20,8 @@ LIBS += $${MAC_LIBS}
 TEMPLATE = app
 TARGET = poapmloc
 macx {
+DESTDIR = /Users/pli/bin/
+CONFIG -= app_bundle
 } else {
 unix {
 DESTDIR = /home/aplinge/bin/
@@ -24,9 +31,7 @@ win32 {
 DESTDIR = 'C:/local_bin/'
 }
 
-
-CONFIG += console \
- warn_off
+CONFIG += console warn_off
 
 CONFIG -= warn_on
 CONFIG += c++11
@@ -37,6 +42,11 @@ win32 {
 DEFINES += WIN32
 }
 DEFINES += M_PI=3.14159265358979323846
+
+QMAKE_CFLAGS += -fPIC
+QMAKE_CXXFLAGS += -fPIC
+
+
 
 win32 {
 QMAKE_CXXFLAGS_RELEASE += /openmp /O2 /Ot /fp:fast
