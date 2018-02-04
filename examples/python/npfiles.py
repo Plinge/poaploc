@@ -53,7 +53,6 @@ def labeledAngleToRow(frame, time, label, x):
     row.extend(x.spectrum)
     return row
 
-
 def anglesFromEM(data, time, window, threshold=0.05):
     """
     return a list of SpecAngles from a msl data for the given time window

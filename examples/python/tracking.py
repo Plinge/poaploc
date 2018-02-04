@@ -22,14 +22,15 @@ import sys
 from paths import make_sure_path_exists
 import angles
 
-CMDALL = '--precision 1 --elevation-precision 5 --min-likelihood 0.01 --skip 3 --post-min-bands 4 --post-min-energy=-40'
-
-CMD =  "--gain-mode 3 --gain 40 --gain-smooth 0.05 --gain-max 24 --maxelevation"
+CMDALL = '--precision 1 --elevation-precision 5 --min-likelihood 0.01 --skip 3 \
+--post-min-bands 4 --post-min-energy=-40 \
+--sampling-frequency 48000 \
+--maxelevation --max-elevation 45 \
+--frame-length 12 --frame-step 6 '
+CMD =  "--gain-mode 3 --gain 40 --gain-smooth 0.05 --gain-max 24"
 #'poa5sg' : "--gain-mode 0 --gain 30 --post-time 0.5 --maxelevation --spike-ath 0",
 
-ARG =  "--sampling-frequency 48000 --max-elevation 45 \
---bands 16 --fmin 300 --fmax 3000 --frame-length 12 --frame-step 6 \
---gamma 0.5 --spike-mth 6 --spike-ath 0.0"
+ARG =  "--bands 16 --fmin 300 --fmax 3000 --gamma 0.5 --spike-mth 6 --spike-ath 0.0"
 
 ARGS_POST = '--post-time 0.5 --post-min-bands 4 --post-min-energy=-40'
 
@@ -166,7 +167,10 @@ def compute_em_sub(destfull,
         if suf is not None:
             outpath = outpath.replace('.npy','_'+suf+'.npy')             
         if os.path.exists(outpath) and not redo:
+            print outpath, 'exists, skipped.'
             continue
+        
+        print outpath
         
         for micarray in range(num_arrays):
             filepath = filepath0.replace('_a0.npy','_a'+str(micarray)+'.npy')
