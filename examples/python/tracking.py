@@ -139,10 +139,9 @@ def compute_em_sub(destfull,
     if win is None:
         win = EMWINDOW
         step = EMTIMESTEP
-        suf = []
-    else:
-        suf = ['w%03d' % (win*100)]
-        step = min(EMTIMESTEP, win*0.25)
+    
+    suf = ['w%03d' % (win*100)]
+    step = win*0.25
     if splitt!=22  or joint!=12:
         suf.append('s%dj%d'%(splitt,joint))
     if bands!=7:

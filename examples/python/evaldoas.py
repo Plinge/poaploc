@@ -29,7 +29,7 @@ def angles_min_dist_permutation(list1,list2):
     for list2per in itertools.permutations(list2):
         dists=[]
         for (a1,a2) in zip(list1,list2per[:l1]):
-            dists.append( angles.difference(a1,a2) )
+            dists.append( angles.differences(a1,a2) )
         dist = np.sqrt(np.sum((v*v for v in dists)))
         if midi is None or dist<midi:
             midi=dist
@@ -37,7 +37,7 @@ def angles_min_dist_permutation(list1,list2):
     return best
 
 def load_gt_as_ta(filename):
-    data = pd.read_csv(filename,sep='\s')
+    data = pd.read_csv(filename,sep='\s',engine='python')
     len  = data.time.size
     res={}
     for index in xrange(len):
@@ -57,6 +57,12 @@ def load_em_as_ta(filename):
             res[t]=[]
         res[t].append(data[index,2])
     del data
+    return res
+
+def add_bias_ta(tadata,bias):
+    res={}
+    for t in tadata.keys():
+        res[t] = np.array(tadata[t]) + bias
     return res
 
 def eval_ta(gt,de,window=0.13,maxdoaerror=15):
@@ -80,8 +86,18 @@ def eval_ta(gt,de,window=0.13,maxdoaerror=15):
         if len(de_doas)>len(gt_doas):
             fp = fp + len(de_doas)-len(gt_doas)
     rmse = np.sqrt(np.sum(v*v for v in errors)/float(len(errors)))
+    bias = np.mean(errors)
     f,pr,re=_get_fpr(tp,fp,fn)
-    print "RMSE %.1f"%rmse,
-    print "%6.1f%% pr %6.1f%% re"%(pr,re)
+    return rmse,bias,f,pr,re
+    
+def eval_ta_biased(gt,de,window=0.13,maxdoaerror=15):
+    rmse,bias,f,pr,re = eval_ta(gt,de,window,maxdoaerror)
+    de = add_bias_ta(de, bias)
+    rmse,_,f,pr,re = eval_ta(gt,de,window,maxdoaerror)
+    return rmse,bias,f,pr,re
+    
+def print_result(rmse,bias,f,pr,re):    
+    print "RMSE %5.1f(%5.1f) deg"%(rmse,bias),
+    print "%6.1f%% pr %6.1f%% re %6.1f%%"%(pr,re,f),
                 
         
