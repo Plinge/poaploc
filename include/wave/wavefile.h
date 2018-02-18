@@ -333,13 +333,6 @@ public:
     virtual void setSample(long position, int channel,double val) throw (std::exception)
     {
         int64_t bytePosition = getBytePosition(position, channel);
-        if (bytePosition<0) {
-            qDebug() << "Negative byte position " << bytePosition << "for setSample " << position << "," << channel;
-            qDebug() <<  position << waveHeader.bytesPerFrame << ((channel*waveHeader.bitsPerSample)>>3);
-            qDebug() <<  position * static_cast<uint64_t>(waveHeader.bytesPerFrame);
-
-            //return;
-        }
         testBytePosition(bytePosition);
         if (format == WAVE_FORMAT_PCM) {
             if (waveHeader.bitsPerSample == 16)  {
