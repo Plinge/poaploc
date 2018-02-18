@@ -1,0 +1,3 @@
+[submodule "examples/rirgenerator"]
+	path = examples/rirgenerator
+	url = https://github.com/sri17388/py-RIR-Generator.git
