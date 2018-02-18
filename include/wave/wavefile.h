@@ -102,13 +102,14 @@ protected:
     }
 
     /** get byte position for sample */
-    inline int getBytePosition(int position, int channel ) const
+    inline uint64_t getBytePosition(int position, int channel ) const
     {
-        return  position * waveHeader.bytesPerFrame + ((channel*waveHeader.bitsPerSample)>>3);
+        return  static_cast<uint64_t>(position) * static_cast<uint64_t>(waveHeader.bytesPerFrame)
+                + static_cast<uint64_t>(( channel* static_cast<int>(waveHeader.bitsPerSample))>>3);
     }
 
     /** check if position in range */
-    inline bool bytePositionInData(int position) const
+    inline bool bytePositionInData(uint64_t position) const
     {
         if (position < 0) return false;
         if ((unsigned long)position >= dataLengthInBytes) return false;
@@ -116,7 +117,7 @@ protected:
     }
 
     /** check if position in range and throw WaveFileException if not */
-    inline void testBytePosition(int position, int offset=0) const throw (std::exception)
+    inline void testBytePosition(uint64_t position, int offset=0) const throw (std::exception)
     {
         bool fail=false;
         if (!bytePositionInData(position)) {
@@ -331,7 +332,14 @@ public:
 
     virtual void setSample(long position, int channel,double val) throw (std::exception)
     {
-        int bytePosition = getBytePosition(position, channel);
+        int64_t bytePosition = getBytePosition(position, channel);
+        if (bytePosition<0) {
+            qDebug() << "Negative byte position " << bytePosition << "for setSample " << position << "," << channel;
+            qDebug() <<  position << waveHeader.bytesPerFrame << ((channel*waveHeader.bitsPerSample)>>3);
+            qDebug() <<  position * static_cast<uint64_t>(waveHeader.bytesPerFrame);
+
+            //return;
+        }
         testBytePosition(bytePosition);
         if (format == WAVE_FORMAT_PCM) {
             if (waveHeader.bitsPerSample == 16)  {

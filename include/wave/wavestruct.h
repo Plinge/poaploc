@@ -29,8 +29,8 @@ typedef struct  WavWaveEntry {
  uint32_t  subChunkSize;
  uint16_t format;
  uint16_t channels;
- uint32_t  samplingFrequency;
- uint32_t  bytesPerSecond;
+ uint32_t samplingFrequency;
+ uint32_t bytesPerSecond;
  uint16_t bytesPerFrame; // = Channels * Bit/8
  uint16_t bitsPerSample;
 } hWAVE;
