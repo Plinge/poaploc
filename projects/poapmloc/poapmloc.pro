@@ -1,35 +1,9 @@
 #
 #
 #
-macx {
-QMAKE_MAC_SDK = macosx10.12
-}
-
-# adapt the follwing where necessary
-MAC_INCLUDE =  /Users/pli/homebrew/opt/gcc-fftw3/include
-#/Users/pli/local/include
-#/Users/pli/homebrew/Cellar/gcc/6.3.0_1/include/c++/6.3.0
-MAC_LIBS = -L/Users/pli/homebrew/opt/gcc-fftw3/lib
-
-macx {
-# MacOS X
-INCLUDEPATH += $${MAC_INCLUDE}
-LIBS += $${MAC_LIBS}
-}
 
 TEMPLATE = app
 TARGET = poapmloc
-macx {
-DESTDIR = /Users/pli/bin/
-CONFIG -= app_bundle
-} else {
-unix {
-DESTDIR = /home/aplinge/bin/
-DEFINES += HAVE_ALSA
-}}
-win32 {
-DESTDIR = 'C:/local_bin/'
-}
 
 CONFIG += console warn_off
 
@@ -43,19 +17,7 @@ DEFINES += WIN32
 }
 DEFINES += M_PI=3.14159265358979323846
 
-QMAKE_CFLAGS += -fPIC
-QMAKE_CXXFLAGS += -fPIC
-
-
-
-win32 {
-QMAKE_CXXFLAGS_RELEASE += /openmp /O2 /Ot /fp:fast
-} else {
-QMAKE_CXXFLAGS += -std=c++11
-QMAKE_CXXFLAGS += -g
-QMAKE_CXXFLAGS_RELEASE += -O4 -finline-functions -fopenmp -ffast-math -march=corei7
-}
-
+include(../config.pro)
 
 DEPENDPATH += .
 MOC_DIR += ./tmp_moc
@@ -97,7 +59,15 @@ HEADERS += onlinemultilocalizer.h \
     ../../include/localization/poaplocalizergeneric.h \
     ../../include/localization/tabledbackprojection.h \
     ../../include/localization/tabulartwodeebackprojection.h \
-    ../../include/neuro/poapifier.h
+    ../../include/neuro/poapifier.h \
+    angulardetection.h \
+    angulargaussian.h \
+    localizedspectra.h \
+    localizedspectrum.h \
+    onlinemultilocalizer.h \
+    stdafx.h \
+    ../../../FFTW/fftw3.h \
+    ../../../FFTW/fftw3.h
 
 #Source files
 SOURCES +=  ./main.cpp \
@@ -123,25 +93,15 @@ SOURCES +=  ./main.cpp \
     ../../include/localization/poaplocalizergeneric.cpp \
     ../../include/localization/tabulartwodeebackprojection.cpp \
     ../../include/wave/wavecombination.cpp \
-    ../../include/neuro/poapifier.cpp
+    ../../include/neuro/poapifier.cpp \
+    localizedspectra.cpp \
+    localizedspectrum.cpp \
+    main.cpp \
+    onlinemultilocalizer.cpp \
+    stdafx.cpp
 
 INCLUDEPATH += . ../../include
 
-win32 {
-!contains(QMAKE_TARGET.arch, x86_64) {
-INCLUDEPATH += C:/usr/lib/fftw32
-LIBS += -LC:/usr/lib/fftw32
-LIBS += -LC:/Qt/Tools/mingw492_32/lib/gcc/i686-w64-mingw32/4.9.2
-LIBS += -lgomp
-LIBS += -lfftw3-3 -lfftw3f-3
-} else {
-INCLUDEPATH += C:/usr/lib/fftw64
-LIBS += -LC:/usr/lib/fftw64
-LIBS += -lfftw3-3 -lfftw3f-3
-}
-} else {
-LIBS += -lgomp
-LIBS += -lfftw3 -lfftw3f
-}
+
 
 
