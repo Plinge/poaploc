@@ -33,7 +33,7 @@ bool PoAPifyWave::process(int sz, Audio::Wave &out,double startTime,double endTi
     if (endTime>=0.0) {
         maxFrame=(0.5+endTime*samplingFrequency);
     }
-    int frame=startTime*samplingFrequency;
+    int frame = startTime*samplingFrequency;
     int frameOut = 0;
 
     if (bandsum) {
@@ -41,6 +41,7 @@ bool PoAPifyWave::process(int sz, Audio::Wave &out,double startTime,double endTi
     } else {
         out.create(samplingFrequency,channels*bandCount,maxFrame-frame);
     }
+
     QElapsedTimer timer;
     timer.start();
     while (frame<maxFrame) {
@@ -76,10 +77,10 @@ bool PoAPifyWave::process(int sz, Audio::Wave &out,double startTime,double endTi
             for (int channel=0;channel<channels;channel++) {
                 for (int bandIndex=0;bandIndex<bandCount;bandIndex++) {
                     int spikedIndex = channels*bandIndex+channel;
-    //                int nz = spiked[spikedIndex]->getNozeroSampleCount();
-    //                if (nz) {
-    //                    cerr << channel << ", " << bandIndex << " " << nz << " spikes" << endl;
-    //                }
+                    //int nz = spiked[spikedIndex]->getNozeroSampleCount();
+                    //if (nz) {
+                    //    cerr << channel << ", " << bandIndex << " " << nz << " spikes" << endl;
+                    //}
                     for (int p=0;p<xx;p++) {
                         out.setSample(frameOut+p, spikedIndex, spiked[spikedIndex]->getSample(p,0));
                     }

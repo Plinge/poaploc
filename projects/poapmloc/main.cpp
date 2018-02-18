@@ -20,7 +20,7 @@ ListenerThreadF* input = 0;
 
 void copyright()
 {
-    cerr << "poapmloc " << COPYRIGHTSTR << " Axel Plinge, code revision " <<  REVISIONSTR << endl;
+//    cerr << "poapmloc " << COPYRIGHTSTR << " Axel Plinge, code revision " <<  REVISIONSTR << endl;
     cerr << endl;
     cerr << "This software implements the cochlear & mid-brain model localization decribed in:" << endl;
     cerr << "[1] Plinge, A., Hennecke, M. H., & Fink, G. A. (2010)." << endl;

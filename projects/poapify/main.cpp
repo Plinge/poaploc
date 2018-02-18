@@ -91,8 +91,10 @@ int main(int argc, char *argv[])
         cerr << "PARAMETERS:" << endl;
         cerr << "--spike-mode 1" << endl;
         cerr << "mode 0: no spike generation, just apply filterbank."  << endl;
-        cerr << "mode 1: halfway rectification for spike generation (default)."  << endl;
-        cerr << "mode 2: two way rectification for spike generation."  << endl;
+        cerr << "mode 1: halfway rectification PoAP spike generation (default)."  << endl;
+        cerr << "mode 2: two way rectification PoAP spike generation (experimental)."  << endl;
+        cerr << "mode 4: zero-crossing spike generation."  << endl;
+        cerr << "mode 6: half-way rectification."  << endl;
         cerr << endl;
         cerr << "--bands 16 --fmin 300 --fmax 3000 --bandwidth 1.0" << endl;
         cerr << "Use  16 gammatone filters  with ERB spaced center frequnecies  between 300 and" << endl;

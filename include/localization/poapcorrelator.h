@@ -16,9 +16,10 @@
 #include <QMap>
 #include <QVector>
 #include <QSharedPointer>
-
+#include <stdint.h>
 #include "wave/wave.h"
 #include "neuro/poapifier.h"
+#include "neuro/spikecorrelator.h"
 
 class PoAPCorrelator : public PoAPifier
 {

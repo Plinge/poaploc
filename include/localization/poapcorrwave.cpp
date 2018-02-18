@@ -132,11 +132,13 @@ bool PoAPCorrWave::process(int sz, double startTime,double endTime)
         //position += frameCount*channels;
         frame +=  frameCount;
 
-        double procTime = timer.elapsed()/1000.0;
-        fprintf(stderr,"%.2fs processed in %.2fs (%.3f x real time)            \r",
-                inputTime + frameTime, procTime, procTime / (inputTime+ frameTime));
-        if (debug) {
-            fprintf(stderr,"\n");
+        if (!quiet) {
+            double procTime = timer.elapsed()/1000.0;
+            fprintf(stderr,"%.2fs processed in %.2fs (%.3f x real time)            \r",
+                    inputTime + frameTime, procTime, procTime / (inputTime+ frameTime));
+            if (debug) {
+                fprintf(stderr,"\n");
+            }
         }
         if (debug && calcIteration>=debug) {
             break;

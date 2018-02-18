@@ -22,7 +22,9 @@ public:
     bool process(int sz, double startTime=0.0, double endTime=-1);
 
 
-
+    void setQuiet(bool b) {
+        quiet=b;
+    }
 
     virtual int getChannelCount()
     {
@@ -31,7 +33,7 @@ public:
 
 protected:
     const Audio::Wave* wav;
-
+    bool quiet;
 };
 
 #endif // POAPCORRWAVE_H
