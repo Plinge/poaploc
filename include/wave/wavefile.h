@@ -306,7 +306,7 @@ public:
 
     virtual double getSample(long position, int channel) const throw (std::exception)
     {
-        int bytePosition = getBytePosition(position, channel);
+        uint64_t bytePosition = getBytePosition(position, channel);
         testBytePosition(bytePosition);
         if (format == WAVE_FORMAT_PCM) {
             if (waveHeader.bitsPerSample == 16)  {
@@ -332,7 +332,7 @@ public:
 
     virtual void setSample(long position, int channel,double val) throw (std::exception)
     {
-        int64_t bytePosition = getBytePosition(position, channel);
+        uint64_t bytePosition = getBytePosition(position, channel);
         testBytePosition(bytePosition);
         if (format == WAVE_FORMAT_PCM) {
             if (waveHeader.bitsPerSample == 16)  {
@@ -359,7 +359,7 @@ public:
     /** get a single sample */
     inline int16_t get16bitSample(int position, int channel) const throw (std::exception)
     {
-          int bytePosition = getBytePosition(position, channel);
+          uint64_t bytePosition = getBytePosition(position, channel);
           testBytePosition(bytePosition);
           if (waveHeader.bitsPerSample == 16)  {
                return *(int16_t*)(data+bytePosition);
@@ -377,7 +377,7 @@ public:
     /** get a single sample */
     inline int32_t get32bitSample(int position, int channel) const throw (std::exception)
     {
-        int bytePosition = getBytePosition(position, channel);
+        uint64_t bytePosition = getBytePosition(position, channel);
         testBytePosition(bytePosition);
         if (waveHeader.bitsPerSample == 32)  {
             return *(int32_t*)(data+bytePosition);
