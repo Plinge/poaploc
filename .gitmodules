@@ -1,3 +1,6 @@
 [submodule "examples/rirgenerator"]
 	path = examples/rirgenerator
 	url = https://github.com/sri17388/py-RIR-Generator.git
+[submodule "h5py"]
+	path = h5py
+	url = https://github.com/h5py/h5py.git
