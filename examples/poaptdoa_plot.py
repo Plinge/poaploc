@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 CMD = 'C:/local_bin/poaptdoa'
 MAXTAU = 14 
-ARG = '--max-tau '+str(MAXTAU)
+ARG = '--quiet --max-tau '+str(MAXTAU)
 CSVFILE = 'circulararry.csv' 
 os.system(CMD+' '+ARG+' '+'circulararray.wav >'+CSVFILE)
 

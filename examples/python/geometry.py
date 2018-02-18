@@ -31,5 +31,11 @@ def circ_array(r,n=8,z=0.0):
         ar.append(v.dot(rotation_xy(a)))
     s=[]
     for m in ar:
+        s.append(m)
+    return s
+
+def coordstring(ar): 
+    s=[]
+    for m in ar:
         s.append("%.3f,%.3f,%.3f" % (m[0],m[1],m[2]))
     return ','.join(s)

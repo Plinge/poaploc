@@ -16,6 +16,7 @@ FILES = {
 'fi13sq02' : AUDIOPATH + 'fi13sq02_2mp-array.wav',
       }
 
-from geometry import circ_array
+from geometry import circ_array, coordstring
 
-ARG_GEO = '--mic-positions '+circ_array(0.05)
+GEO = circ_array(0.05,n=8)
+ARG_GEO = '--mic-positions '+coordstring(GEO)

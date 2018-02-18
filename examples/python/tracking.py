@@ -15,6 +15,7 @@ This is an implementation of the following paper:
 import itertools
 import os
 import platform
+import soundfile
 import pandas as pd
 import numpy as np
 import glob
@@ -57,7 +58,65 @@ BANDS = 16
 MODE_PRES = { 'msl' : ARGS_POST ,
               'msn' : ARGS_POST + ' --poap --argmax --sum-bands' ,
               'msr' : '--post-time 0'}
+
+def compute_poapspikes(filepath,args,outfile,redo=False):
+    print outfile
+    cmd2 = BINPATH + 'poapify  ' +args  
+    cmd2 += ' ' + filepath
+    cmd2 += ' ' + outfile
+    if not os.path.exists(outfile) or redo:
+        print cmd2        
+        if os.system(cmd2) != 0:
+            raise RuntimeError()
+
+def compute_poaptdoa(filepath,args,outfile,redo=False):
+    print outfile
     
+    data, fs = soundfile.read(filepath)
+    MICS = data.shape[1]
+    TIME_MAX = float(data.shape[0]) / fs
+    del data
+    print filepath, "has", MICS, "mics for", TIME_MAX, "s" 
+    
+    cmd2 = BINPATH + 'poaptdoa --frame-length 12 --frame-step 6 ' +args  
+    cmd2 += ' ' + filepath
+    cmd2 += ' >' + outfile
+    if not os.path.exists(outfile) or redo:
+        print cmd2        
+        if os.system(cmd2) != 0:
+            raise RuntimeError()
+    
+    TDOAS = 14*2+1
+    FRAMES = int(np.ceil(TIME_MAX / 6e-3))+1
+    
+    ''' diagonal enumeration :-) '''
+    PAIRCNT = ((MICS-1)*MICS)/2
+    PAIRS={}
+    for n,(i,j) in enumerate(itertools.combinations(range(MICS),2)):
+        PAIRS[ int(i*MICS+j) ] = n
+    
+    ''' convert to (time frames, time lag, freq, pair) '''
+    res = np.zeros((FRAMES,TDOAS,BANDS,PAIRCNT))  
+    index =0                  
+    with open(outfile,'r') as f:          
+        for line in f.readlines():
+            
+            index=index+1            
+            if index==1:
+                print line
+                continue
+                
+            entry = [float(v) for v in line.split()]
+            band = int(entry[1])
+            pair = PAIRS[  int(entry[2])*MICS + int(entry[3]) ]
+            frame= int(entry[0]/6e-3)
+            if frame >= FRAMES:
+                print "time", entry[0], ">", TIME_MAX
+                break
+            res[frame,:,band,pair] = entry[4:]
+            
+    return res
+            
 def compute_msx(files,args,destdir,mode='msl',redo=False):
     destfull = destdir+'/'
     make_sure_path_exists(destfull)
