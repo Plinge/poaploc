@@ -21,13 +21,18 @@ for task in sorted(FILES.keys()):
 
     ba = evaldoas.load_gt_as_ta(DATAPATH+'results/'+task.replace('sq','')+"qom6_dbc_sti.dat")
     r = evaldoas.eval_ta_biased(gt, ba)
-    evaldoas.print_result(*r)
-    print 'ICASSP2012 paper'
+    
+    print evaldoas.string_result(*r), 'ICASSP2012 paper'
 
     results = sorted(glob.glob(WORKPATH+'aem_'+task+"*_a0*.npy"))
+    rr=[]
     for result in results:
         de = evaldoas.load_em_as_ta(result)
+        if len(de)<2:
+            continue
         r = evaldoas.eval_ta_biased(gt, de)
-        evaldoas.print_result(*r)
-        print os.path.basename(result)
+        (rmse,bias,f,pr,re) = r
+        rr.append( ( f,evaldoas.string_result(*r)+ '  ' + os.path.basename(result) ) )
         
+    for (f, resstr) in sorted(rr, key = lambda (f,s) : f , reverse=True):
+        print resstr

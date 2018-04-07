@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 
 
 files = glob.glob('./data/cor_fi11sq01_3a_m6_*.npy')
-for index, file in enumerate(files):
-    data = np.load(file)
-    print file, data.shape
+for index, filepath in enumerate(files):
+    data = np.load(filepath)
+    print filepath, data.shape
     
     print 'computing sums..'
     BANDS=range(data.shape[2])
@@ -31,7 +31,7 @@ for index, file in enumerate(files):
         PAIRIDX[n] = (i,j)
     
     fig = plt.figure(index)     
-    fig.canvas.set_window_title(os.path.basename(file))  
+    fig.canvas.set_window_title(os.path.basename(filepath))  
     for pair in PAIRS:
         pa=PAIRIDX[pair]
         plt.subplot((MICS)-1,(MICS)-1,pa[1] + ((MICS)-1)*pa[0])

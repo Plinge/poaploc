@@ -11,7 +11,7 @@ import evaldoas
 from paths import make_sure_path_exists
 from tracking import compute_poapmloc
 sys.path.append("../python")
-from config import WORKPATH, FILES, ARG_GEO
+from config import WORKPATH, TEMPPATH, FILES, ARG_GEO
 
 ARG_ALL = '--precision 1 --elevation-precision 5 --min-likelihood 0.01 --skip 3 \
 --post-min-bands 4 --post-min-energy=-40 \
@@ -26,9 +26,9 @@ ARG_MODE = {
     }
 
 ARG_GAIN = {
-#'cg' :  "--gain-mode 0 --gain 40 --gain-max 24",
+'cg' :  "--gain-mode 0 --gain 40 --gain-max 24",
 'dg' :  "--gain-mode 0 --gain 0 --gain-max 24",
-#'eg' :  "--gain-mode 3 --gain 40 --gain-smooth 0.05 --gain-max 24",
+'eg' :  "--gain-mode 3 --gain 40 --gain-smooth 0.05 --gain-max 24",
 'fg' :  "--gain-mode 3 --gain 0 --gain-smooth 0.05 --gain-max 24",
 }
 
@@ -40,7 +40,7 @@ ARG_CFG = {
 
 ARG_POST = {
    '5' : '--post-time 0.5',
-   '1' : '--post-time 0.1',
+#   '1' : '--post-time 0.1',
 #    '0' : '',
             }
 
@@ -54,5 +54,5 @@ for ((mode,mode_arg),(cfg,cfg_arg),(gain,gain_arg),(post,post_arg)) in itertools
         compute_poapmloc(filepath,
                          '--quiet ' +  ' '.join((ARG_ALL,ARG_GEO,mode_arg,cfg_arg,gain_arg,post_arg))  ,
                          'msl_' + scenario +'_'+ cfgstr,
-                         WORKPATH + scenario +'_'+ cfgstr + '.csv' ,
-                         WORKPATH, redo=True)
+                         TEMPPATH + scenario +'_'+ cfgstr + '.csv' ,
+                         WORKPATH, redo=False)
