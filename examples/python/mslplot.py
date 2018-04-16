@@ -143,7 +143,7 @@ def plotmsl(filepath):
     duration = frames/framerate
     ax.imshow(msl, extent=[0,duration,-180,180], origin='lower', 
               aspect =  frames * 0.0002 )    
-    times = np.arange(frames).astype(np.double) / framerate
+    #times = np.arange(frames).astype(np.double) / framerate
     ax.set_ylim(-180,180)
     ax.set_xlim(0,duration)
     ax.yaxis.set_major_locator(MultipleLocator(90))

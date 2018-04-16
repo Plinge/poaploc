@@ -13,7 +13,7 @@ from paths import make_sure_path_exists
 
 make_sure_path_exists('./cnninput/' )
 
-files = glob.glob('./data/cor_*_3a_m6_fg.npy')
+files = glob.glob('./data/cor_fi11sq01_3a_m6_fg.npy')
 for index, filepath in enumerate(files):
     print os.path.basename(filepath)
     

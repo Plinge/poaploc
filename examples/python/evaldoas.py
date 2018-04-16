@@ -47,6 +47,17 @@ def load_gt_as_ta(filename):
         res[t].append(-data.angle[index])
     del data
     return res
+
+def load_gt_as_framed(filename, framestep):
+    data = pd.read_csv(filename,sep='\s',engine='python')
+    frames = int( np.ceil( data.time.max() / float(framestep) ) )
+    res=np.ones((frames,4)) * -999
+    for index in xrange(data.time.size):
+        t = data.time[index]
+        frameindex = int ( t/ float(framestep) ) 
+        res[ frameindex, data.person[index]-1 ] = -data.angle[index]
+    del data
+    return res
     
 def load_em_as_ta(filename):
     data = np.load(filename)
@@ -91,13 +102,16 @@ def eval_ta(gt,de,window=0.13,maxdoaerror=15):
     return rmse,bias,f,pr,re
     
 def eval_ta_biased(gt,de,window=0.13,maxdoaerror=15):
-    rmse,bias,f,pr,re = eval_ta(gt,de,window,maxdoaerror)
+    _,bias,_,_,_ = eval_ta(gt,de,window,maxdoaerror)
     de = add_bias_ta(de, bias)
     rmse,_,f,pr,re = eval_ta(gt,de,window,maxdoaerror)
     return rmse,bias,f,pr,re
+
+def string_result(rmse,bias,f,pr,re):    
+    return ("RMSE %5.1f(%5.1f) deg "%(rmse,bias)) + ( "%6.1f%% pr %6.1f%% re %6.1f%%"%(pr,re,f))
+
     
 def print_result(rmse,bias,f,pr,re):    
-    print "RMSE %5.1f(%5.1f) deg"%(rmse,bias),
-    print "%6.1f%% pr %6.1f%% re %6.1f%%"%(pr,re,f),
+    print string_result
                 
         

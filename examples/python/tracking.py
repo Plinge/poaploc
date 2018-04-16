@@ -69,7 +69,7 @@ def compute_poapspikes(filepath,args,outfile,redo=False):
         if os.system(cmd2) != 0:
             raise RuntimeError()
 
-def compute_poaptdoa(filepath,args,outfile,redo=False):
+def compute_poaptdoa(filepath,args,outfile,skip=0,redo=False):
     print outfile
     
     data, fs = soundfile.read(filepath)
@@ -87,7 +87,7 @@ def compute_poaptdoa(filepath,args,outfile,redo=False):
             raise RuntimeError()
     
     TDOAS = 14*2+1
-    FRAMES = int(np.ceil(TIME_MAX / 6e-3))+1
+    FRAMES = int(np.ceil(TIME_MAX / 6e-3))+1 - skip
     
     ''' diagonal enumeration :-) '''
     PAIRCNT = ((MICS-1)*MICS)/2
@@ -109,7 +109,9 @@ def compute_poaptdoa(filepath,args,outfile,redo=False):
             entry = [float(v) for v in line.split()]
             band = int(entry[1])
             pair = PAIRS[  int(entry[2])*MICS + int(entry[3]) ]
-            frame= int(entry[0]/6e-3)
+            frame= int(entry[0]/6e-3) - skip
+            if frame < 0:
+                continue
             if frame >= FRAMES:
                 print "time", entry[0], ">", TIME_MAX
                 break

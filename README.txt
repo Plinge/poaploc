@@ -11,13 +11,17 @@ poapify  - cochlear model preprocessing [1]
 
 poapmloc - localization in angular domain [1,2]
 
+Data
+----
+patrec.cs.tu-dortmund.de/resources
+
 
 Contact
 -------
 Axel Plinge
-Department of Computer Science
-TU-Dortmund, Germany.
-Email: axel.plinge@udo.edu
+Fraunhifer IIS
+Erlangen, Germany
+
 
 
 Warranty Disclaimer
