@@ -6,7 +6,7 @@ Created on 18.02.2018
 import h5py
 import glob, os
 import numpy as np
-from evaldoas import load_gt_as_framed
+from evaldoas import load_gt_as_nhot
 from config import DATAPATH, DOA_RESOLUTION
 from angles import make360
 from paths import make_sure_path_exists
@@ -21,14 +21,9 @@ for index, filepath in enumerate(files):
     test_x = np.sqrt(test_x*1.0/128.0)            
     test_x[test_x>1.0]=1.0
     
-    task = os.path.basename(filepath).split('_')[1]
-    
-    doas = load_gt_as_framed( DATAPATH+'groundtruth/'+task.replace('sq','')+"_gt.dat" , 6e-3)
-    test_y = np.zeros((doas.shape[0],360/DOA_RESOLUTION),dtype=np.ubyte)
-    for frameindex, doav in enumerate(doas):
-        doaf = doav[doav>-900]
-        for doa in doaf:
-            test_y[frameindex, int( make360(doa))/DOA_RESOLUTION] = 1
+    task = os.path.basename(filepath).split('_')[1]    
+    test_y = load_gt_as_nhot( DATAPATH+'groundtruth/'+task.replace('sq','')+"_gt.dat" , 6e-3, DOA_RESOLUTION)
+    test_y = np.roll(test_y,18,1)
     
     xlen = test_x.shape[0]
     ylen = test_y.shape[0]

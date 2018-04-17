@@ -8,7 +8,7 @@ import os
 
 EXTERNPATHBASE = "D:\\pli\\Experiments\\1804Loc\\"
 
-if os.path.exists(EXTERNPATHBASE):
+if False: #os.path.exists(EXTERNPATHBASE):
     WORKPATH  = EXTERNPATHBASE+'data\\'
     AUDIOPATH = EXTERNPATHBASE+'audio\\'
     RIRPATH   = EXTERNPATHBASE+'rirs/'

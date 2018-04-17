@@ -7,6 +7,7 @@ import itertools
 import numpy as np
 import angles
 import pandas as pd
+from angles import make360
 
 def _get_fpr(tp,fp,fn):
     f,pr,re=0.0,0.0,0.0
@@ -48,16 +49,72 @@ def load_gt_as_ta(filename):
     del data
     return res
 
+def load_gt_as_xy(filename):
+    data = pd.read_csv(filename,sep='\s',engine='python')
+    len  = data.time.size
+    x,y=[],[]
+    for index in xrange(len):
+        x.append( data.time[index] )
+        y.append(-data.angle[index])
+    del data
+    return x, y
+
 def load_gt_as_framed(filename, framestep):
     data = pd.read_csv(filename,sep='\s',engine='python')
     frames = int( np.ceil( data.time.max() / float(framestep) ) )
-    res=np.ones((frames,4)) * -999
-    for index in xrange(data.time.size):
-        t = data.time[index]
-        frameindex = int ( t/ float(framestep) ) 
-        res[ frameindex, data.person[index]-1 ] = -data.angle[index]
+    res=np.ones((frames,int(data.person.max()-1))) * -999
+    lastindex=0
+    firstindex=None
+    for frameindex in xrange(frames):
+        index = lastindex
+        frametime = frameindex * float(framestep) 
+        while True:            
+            t = data.time[index]            
+            if (t - frametime)>2*framestep:
+                break
+            if (frametime - t)>2*framestep:
+                index = index + 1
+                if index > data.time.size:
+                    break
+                continue
+            res[ frameindex, data.person[index]-1 ] = -data.angle[index]
+            if firstindex is None: 
+                firstindex = index
+            index = index + 1
+        if firstindex is not None:
+            ''' advance to last used data point '''
+            lastindex = firstindex           
     del data
     return res
+
+def load_gt_as_nhot(filename, framestep, doares=5.):
+    data = pd.read_csv(filename,sep='\s',engine='python')
+    frames = int( np.ceil( data.time.max() / float(framestep) ) )
+    res=np.zeros((frames,int(360/doares))) 
+    lastindex=0
+    firstindex=None
+    for frameindex in xrange(frames):
+        index = lastindex
+        frametime = frameindex * float(framestep) 
+        while True:            
+            t = data.time[index]            
+            if (t - frametime)>2*framestep:
+                break
+            if (frametime - t)>2*framestep:
+                index = index + 1
+                if index > data.time.size:
+                    break
+                continue
+            res[ frameindex,int(make360( -data.angle[index])/ doares) ] = 1 
+            if firstindex is None: 
+                firstindex = index
+            index = index + 1
+        if firstindex is not None:
+            ''' advance to last used data point '''
+            lastindex = firstindex           
+    del data
+    return res
+
     
 def load_em_as_ta(filename):
     data = np.load(filename)

@@ -16,6 +16,7 @@ from paths import make_sure_path_exists
 
 import matplotlib.pyplot as plt
 from matplotlib._cm_listed import cmaps
+from matplotlib.ticker import MultipleLocator
 
 files = glob.glob('./cnnoutput/*.npy')
 for index, filepath in enumerate(files):
@@ -23,24 +24,27 @@ for index, filepath in enumerate(files):
     
     resmat = np.load(filepath)
     print filepath, resmat.shape
-        
-    task = os.path.basename(filepath).split('_')[1]    
-    doas = load_gt_as_xy( DATAPATH+'groundtruth/'+task.replace('sq','')+"_gt.dat")
     
-    plt.figure(index)
-    plt.title(os.path.basename(filepath))
+    
+
+    resmat = np.roll(resmat,-18,1)
+    
+    task = os.path.basename(filepath).split('_')[1]    
+    times, doas = load_gt_as_xy( DATAPATH+'groundtruth/'+task.replace('sq','')+"_gt.dat")
+    
+    fig = plt.figure(index)    
+    fig.canvas.set_window_title(os.path.basename(filepath))
     ax =plt.subplot(2,1,1)
     #ax  = plt.axes()
         
     frames  = resmat.shape[0]                 
                      
     duration = frames*6e-3
-    ax.imshow(resmat.T, extent=[0,duration,-180,180], origin='lower',   aspect =  frames * 0.00001, cmap='hot' )
+    ax.imshow(resmat.T, extent=[0,duration,-180,180], origin='lower',   aspect =  frames * 0.00001 )
     ax.set_xlim(0,duration)
     ax.set_ylim(-180,180)
-        
-    #ax.set_ylim(-180,180)
-    
+    ax.yaxis.set_major_locator(MultipleLocator(90))
+    ax.yaxis.set_minor_locator(MultipleLocator(30))    
     ax =plt.subplot(2,1,2)
      
     maxmat = np.zeros_like(resmat)
@@ -51,9 +55,9 @@ for index, filepath in enumerate(files):
     ax.imshow(maxmat.T, extent=[0,duration,-180,180], origin='lower',   aspect =  frames * 0.00001, cmap = 'gray_r'  )
     ax.set_xlim(0,duration)
     ax.set_ylim(-180,180)
-
-    
-    #ax.scatter(doas[:,0], doas[:,1],s=0.2, c='w', edgecolors = 'none' )
+    ax.yaxis.set_major_locator(MultipleLocator(90))
+    ax.yaxis.set_minor_locator(MultipleLocator(30))
+    ax.scatter(times, doas, s=0.2, c='r', edgecolors = 'none' )
     
     
 plt.show()    

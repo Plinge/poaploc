@@ -27,8 +27,8 @@ ARG_MODE = {
 
 ARG_GAIN = {
 'cg' :  "--gain-mode 0 --gain 40 --gain-max 24",
-'dg' :  "--gain-mode 0 --gain 0 --gain-max 24",
-'eg' :  "--gain-mode 3 --gain 40 --gain-smooth 0.05 --gain-max 24",
+#'dg' :  "--gain-mode 0 --gain 0 --gain-max 24",
+#'eg' :  "--gain-mode 3 --gain 40 --gain-smooth 0.05 --gain-max 24",
 'fg' :  "--gain-mode 3 --gain 0 --gain-smooth 0.05 --gain-max 24",
 }
 
@@ -55,4 +55,4 @@ for ((mode,mode_arg),(cfg,cfg_arg),(gain,gain_arg),(post,post_arg)) in itertools
                          '--quiet ' +  ' '.join((ARG_ALL,ARG_GEO,mode_arg,cfg_arg,gain_arg,post_arg))  ,
                          'msl_' + scenario +'_'+ cfgstr,
                          TEMPPATH + scenario +'_'+ cfgstr + '.csv' ,
-                         WORKPATH, redo=False)
+                         WORKPATH, redo=True)
