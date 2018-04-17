@@ -13,11 +13,14 @@ from paths import make_sure_path_exists
 
 make_sure_path_exists('./cnninput/' )
 
-files = glob.glob('./data/cor_fi11sq01_3a_m6_fg.npy')
+files = glob.glob('./data/cor_*_3a_m6_fg.npy')
 for index, filepath in enumerate(files):
     print os.path.basename(filepath)
     
     test_x = np.load(filepath)
+    test_x = np.sqrt(test_x*1.0/128.0)            
+    test_x[test_x>1.0]=1.0
+    
     task = os.path.basename(filepath).split('_')[1]
     
     doas = load_gt_as_framed( DATAPATH+'groundtruth/'+task.replace('sq','')+"_gt.dat" , 6e-3)
@@ -38,7 +41,7 @@ for index, filepath in enumerate(files):
             
     hdffile = './cnninput/' +  os.path.basename(filepath).replace(".npy",".hdf5")
     with h5py.File(hdffile, "w") as f:
-        f.create_dataset('test_x', data=test_x)
-        f.create_dataset('test_y', data=test_y)
+        f.create_dataset('X_test', data=test_x)
+        f.create_dataset('Y_test', data=test_y)
         
     print hdffile
