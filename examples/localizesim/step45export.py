@@ -106,8 +106,8 @@ def exportit(offsets,length,files,shuffle=False):
     return testxx, testyy
 
 trainfiles = glob.glob(WORKPATH+'cor_*_r00_3a_m6_fg.npy')
-#for r in [1,2,3,5]:
-#    trainfiles += glob.glob(WORKPATH+'cor_*_r%02d_3a_m6_fg.npy'  % r)
+for r in [2]:
+    trainfiles += glob.glob(WORKPATH+'cor_*_r%02d_3a_m6_fg.npy'  % r)
 validfiles = glob.glob(WORKPATH+'cor_*_r04_3a_m6_fg.npy')
 testfiles = glob.glob(WORKPATH+'cor_*_r06_3a_m6_fg.npy')
     
