@@ -64,18 +64,18 @@ def load_gt_as_framed(filename, framestep):
     frames = int( np.ceil( data.time.max() / float(framestep) ) )
     res=np.ones((frames,int(data.person.max()-1))) * -999
     lastindex=0
-    firstindex=None
     for frameindex in xrange(frames):
         index = lastindex
+        firstindex=None
         frametime = frameindex * float(framestep) 
         while True:            
+            if index > data.time.size:
+                break
             t = data.time[index]            
             if (t - frametime)>2*framestep:
                 break
             if (frametime - t)>2*framestep:
                 index = index + 1
-                if index > data.time.size:
-                    break
                 continue
             res[ frameindex, data.person[index]-1 ] = -data.angle[index]
             if firstindex is None: 
@@ -90,22 +90,22 @@ def load_gt_as_framed(filename, framestep):
 def load_gt_as_nhot(filename, framestep, doares=5.):
     data = pd.read_csv(filename,sep='\s',engine='python')
     frames = int( np.ceil( data.time.max() / float(framestep) ) )
-    res=np.zeros((frames,int(360/doares))) 
+    res=np.ones((frames,int(360/doares)))*-1 
     lastindex=0
-    firstindex=None
-    for frameindex in xrange(frames):
+    for frameindex in xrange(int( np.floor( data.time.min() / float(framestep) ) ), frames):
         index = lastindex
+        firstindex=None
         frametime = frameindex * float(framestep) 
         while True:            
+            if index >= data.time.size:
+                break
             t = data.time[index]            
             if (t - frametime)>2*framestep:
                 break
             if (frametime - t)>2*framestep:
-                index = index + 1
-                if index > data.time.size:
-                    break
+                index = index + 1                
                 continue
-            res[ frameindex,int(make360( -data.angle[index])/ doares) ] = 1 
+            res[ frameindex, int(make360(-data.angle[index]+0.5*doares)/doares) ] = 1 
             if firstindex is None: 
                 firstindex = index
             index = index + 1

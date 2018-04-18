@@ -18,8 +18,8 @@ REDO = False
 ARG_ALL = '--sampling-frequency 48000 --max-tau 14 --start-time 0.02 --end-time 2.0'
 
 ARG_GAIN = {
-#'cg' :  "--gain-mode 0 --gain 40 --gain-max 24",
-#'dg' :  "--gain-mode 0 --gain 0 --gain-max 24",
+#'cg' :  "--gain-mode 0 --gain 40",
+'dg' :  "--gain-mode 0 --gain 0",
 #'eg' :  "--gain-mode 3 --gain 40 --gain-smooth 0.05 --gain-max 24",
 'fg' :  "--gain-mode 3 --gain 0 --gain-smooth 0.05 --gain-max 24",
 }

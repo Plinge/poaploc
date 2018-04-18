@@ -10,18 +10,16 @@ from config import DOA_RESOLUTION, WORKPATH
 from angles import make360
 import warnings
 from paths import make_sure_path_exists
-
+from feats import running_mean, spikenorm
 make_sure_path_exists('./cnninput/' )
 
-def running_mean(x, N):
-    cumsum = np.cumsum(x, 0) 
-    return (cumsum[N:] - cumsum[:-N]) / float(N)        
+
         
 def exportit(offsets,length,files,average):
     testxx=[]
     testyy=[]
     for i,filepath in enumerate(files):
-        print i+1,'/ ',len(files) 
+        print i+1,'/ ',len(files) , filepath
         test_x = np.load(filepath)        
         doaa = os.path.basename(filepath).split('_')[5]
         doa  = int(doaa[1:])
@@ -32,9 +30,8 @@ def exportit(offsets,length,files,average):
             if xx.shape[0] != length:
                 print 'flawed logic'
                 continue
-            xx = np.sqrt(xx*1.0/128.0)
-            themax.append( xx.max() )
-            xx[xx>1.0]=1.0
+            xx,ma  = spikenorm(xx)
+            themax.append(ma)
             if xx.max() <= 1e-8:
                 print 'max is only', xx.max()
                 continue                 
@@ -42,12 +39,12 @@ def exportit(offsets,length,files,average):
                 print 'max is', xx.max(),'?'
                 continue                    
             testxx.append(xx)    
-            test_y = np.zeros((length,360/DOA_RESOLUTION),dtype=np.ubyte)
+            test_y = np.ones((length,360/DOA_RESOLUTION),dtype=np.ubyte)* -1 
             test_y[:  , int( make360(doa))/DOA_RESOLUTION] = 1                 
             testyy.append(test_y)
         
         ''' compress from time to time not to flood memory '''
-        if (i&63==0):
+        if ((1+i)&127==0):
             testxx = [np.vstack(testxx),]
             testyy = [np.vstack(testyy),]
             
@@ -103,4 +100,5 @@ def exportfull(mode,average):
     print outfile
 
 exportfull('3a_m6_fg',20)
+exportfull('3a_m6_fg',0)
 
