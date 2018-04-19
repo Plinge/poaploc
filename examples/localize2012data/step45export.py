@@ -14,7 +14,7 @@ from feats import running_mean, spikenorm
 
 make_sure_path_exists('./cnninput/' )
 
-files = glob.glob('./data/cor_fi*_3a_m6_fg.npy')
+files = glob.glob('./data/cor_fi*.npy')
 for index, filepath in enumerate(files):
     print os.path.basename(filepath)
     task = os.path.basename(filepath).split('_')[1]

@@ -39,8 +39,8 @@ def exportit(offsets,length,files,average):
                 print 'max is', xx.max(),'?'
                 continue                    
             testxx.append(xx)    
-            test_y = np.ones((length,360/DOA_RESOLUTION),dtype=np.ubyte)* -1 
-            test_y[:  , int( make360(doa))/DOA_RESOLUTION] = 1                 
+            test_y = np.zeros((length,360/DOA_RESOLUTION),dtype=np.int) 
+            test_y[:  , int( make360(doa+0.5*DOA_RESOLUTION))/DOA_RESOLUTION] = 1                 
             testyy.append(test_y)
         
         ''' compress from time to time not to flood memory '''
@@ -98,6 +98,10 @@ def exportfull(mode,average):
         print 'valid', valid_shape
         print 'test', test_shape
     print outfile
+
+
+exportfull('3a_m6_dg',20)
+#exportfull('3a_m6_dg',0)
 
 exportfull('3a_m6_fg',20)
 exportfull('3a_m6_fg',0)

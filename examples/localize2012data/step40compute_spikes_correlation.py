@@ -16,8 +16,8 @@ from config import WORKPATH,TEMPPATH, FILES
 ARG_ALL = '--sampling-frequency 48000 --max-tau 14'
 
 ARG_GAIN = {
-#'cg' :  "--gain-mode 0 --gain 40 --gain-max 24",
-#'dg' :  "--gain-mode 0 --gain 0 --gain-max 24",
+'cg' :  "--gain-mode 0 --gain 40 --gain-max 24",
+'dg' :  "--gain-mode 0 --gain 0 --gain-max 24",
 'eg' :  "--gain-mode 3 --gain 40 --gain-smooth 0.05 --gain-max 24",
 'fg' :  "--gain-mode 3 --gain 0 --gain-smooth 0.05 --gain-max 24",
 }
@@ -37,7 +37,7 @@ for ((cfg,cfg_arg),(gain,gain_arg)) in itertools.product(ARG_CFG.iteritems(),ARG
         npypath = WORKPATH + "cor_"+ scenario +'_'+ cfgstr + '.npy' 
         res = compute_poaptdoa(filepath,
                          '--quiet ' +  ' '.join((ARG_ALL,cfg_arg,gain_arg))  ,
-                         spikedpath, redo=True
+                         spikedpath, redo=False
                          )
         np.save(npypath, res)
         print npypath
