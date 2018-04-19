@@ -12,10 +12,12 @@ if os.path.exists(EXTERNPATHBASE):
     WORKPATH  = EXTERNPATHBASE+'data\\'
     AUDIOPATH = EXTERNPATHBASE+'audio\\'
     RIRPATH   = EXTERNPATHBASE+'rirs/'
+    CNNINPUTPATH   = EXTERNPATHBASE+'cnninput/'
 else:
     WORKPATH  = './data/'
     AUDIOPATH = './audio/'
     RIRPATH = './rirs/'
+    CNNINPUTPATH = "./cnninput"
 
 import tempfile
 TEMPPATH = tempfile.gettempdir()+'/' # the current temporary directory
