@@ -90,7 +90,7 @@ def load_gt_as_framed(filename, framestep):
 def load_gt_as_nhot(filename, framestep, doares=5.):
     data = pd.read_csv(filename,sep='\s',engine='python')
     frames = int( np.ceil( data.time.max() / float(framestep) ) )
-    res=np.zeros((frames,int(360/doares))) 
+    res=np.zeros((frames,int(360/doares)),dtype=np.byte) 
     lastindex=0
     for frameindex in xrange(int( np.floor( data.time.min() / float(framestep) ) ), frames):
         index = lastindex
