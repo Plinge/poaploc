@@ -19,6 +19,7 @@ for index, filepath in enumerate(files):
     print os.path.basename(filepath)
     task = os.path.basename(filepath).split('_')[1]
     xx, _ = spikenorm( np.load(filepath) )
+    xx = np.transpose(xx, [0,3,2,1])
     yy = load_gt_as_nhot( DATAPATH+'groundtruth/'+task.replace('sq','')+"_gt.dat" , 6e-3, DOA_RESOLUTION)
     yy = np.roll(yy,-18,1)
         
@@ -36,8 +37,8 @@ for index, filepath in enumerate(files):
         test_y = running_mean(yy, average)        
         hdffile = './cnninput/' +  os.path.basename(filepath).replace(".npy",("_w%02d.hdf5"%average))
         with h5py.File(hdffile, "w") as f:
-            f.create_dataset('X_test', data=test_x)
-            f.create_dataset('Y_test', data=test_y)
+            f.create_dataset('X_test', data=test_x, dtype=np.float16)
+            f.create_dataset('Y_test', data=test_y, dtype=np.int8)
             
         print hdffile,
         print test_x.shape , '->'  ,test_y.shape
