@@ -127,6 +127,27 @@ def load_em_as_ta(filename):
     del data
     return res
 
+def load_nhot_as_ta(filename,framestep,doaresolution=5.,thres=0.5,roll=0,singlesource=False):
+    data = np.load(filename)
+    if roll != 0:
+        data = np.roll(data,roll,1)
+    res={}
+    if singlesource:
+        for frameindex, entry in enumerate(data):
+            frametime = frameindex * framestep
+            nn = np.argmax(entry)
+            if entry[nn]<thres:
+                continue        
+            res[frametime] = [nn * doaresolution -180.0]
+    else:
+        for frameindex, entry in enumerate(data):
+            frametime = frameindex * framestep
+            nn = np.where(entry>thres)[0]
+            if len(nn)<1:
+                continue        
+            res[frametime] = nn * doaresolution -180.0  
+    return res
+
 def add_bias_ta(tadata,bias):
     res={}
     for t in tadata.keys():
@@ -165,7 +186,7 @@ def eval_ta_biased(gt,de,window=0.13,maxdoaerror=15):
     return rmse,bias,f,pr,re
 
 def string_result(rmse,bias,f,pr,re):    
-    return ("RMSE %5.1f(%5.1f) deg "%(rmse,bias)) + ( "%6.1f%% pr %6.1f%% re %6.1f%%"%(pr,re,f))
+    return ("RMSE %5.1f(%5.1f) deg "%(rmse,bias)) + ( "P %6.1f%% R %6.1f%% F1 %6.1f%%"%(pr,re,f))
 
     
 def print_result(rmse,bias,f,pr,re):    
