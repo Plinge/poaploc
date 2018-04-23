@@ -16,7 +16,7 @@ make_sure_path_exists( CNNINPUTPATH )
 
 
         
-def exportit(step,length,files,average):
+def exportit(step,length,files,average,shuffle=False):
     testxx=[]
     testyy=[]
     for i,filepath in enumerate(files):
@@ -48,22 +48,27 @@ def exportit(step,length,files,average):
         if (i+1)&64 == 0:
             testxx=[np.vstack(testxx),]
             testyy=[np.vstack(testyy),]
-        
-    ii = range(len(testxx)) 
-    np.random.shuffle(ii)               
-    testxx = np.vstack([testxx[i] for i in ii])
-    testyy = np.vstack([testyy[i] for i in ii])
   
+    if shuffle:      
+        ii = range(len(testxx)) 
+        np.random.shuffle(ii)               
+        testxx = np.vstack([testxx[i] for i in ii])
+        testyy = np.vstack([testyy[i] for i in ii])
+    else:
+        testxx = np.vstack(testxx[i])
+        testyy = np.vstack(testyy[i])
+    
     print
     print testxx.shape , '->', testyy.shape    
        
     return testxx, testyy
 
-def getrunfiles(mode,runs):
+def getrunfiles(mode,runs,shuffle=False):
     res = []
     for r in runs:
         res += glob.glob(WORKPATH+'cor_*_r'+('%02d_'% r)+mode+'.npy'  )
-    np.random.shuffle(res)
+    if shuffle:
+        np.random.shuffle(res)
     return res
 
 def exportfull(mode,average):
@@ -119,9 +124,9 @@ def exportfull(mode,average):
     print outfile
 
 exportfull('3a_m6_fg',20)
-#exportfull('3a_m6_fg',0)
+exportfull('3a_m6_fg',0)
 
-#exportfull('3a_m6_dg',20)
-#exportfull('3a_m6_dg',0)
+exportfull('3a_m6_dg',20)
+exportfull('3a_m6_dg',0)
 
 

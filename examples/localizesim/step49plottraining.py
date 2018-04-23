@@ -16,7 +16,7 @@ import numpy as np
 ##f = open('cnn_axel_history.json','w')
 ##f.write(json.dumps(history))
 ##f.close()
-f = open('cnn_axel_history.json','r')
+f = open('train-3a_m6_fg_w20-CCED-history.json','r')
 history = json.loads(f.read())
 #print(history)
 
@@ -25,9 +25,10 @@ valid=[]
 doa=[]
 
 for entry in history:
+    print entry
     train.append(entry['acc'])
     valid.append(entry['val_acc'])
-    doa.append(entry['val_doa'] )
+    doa.append(entry['doa_err'] )
     
     
 fig = plt.figure()

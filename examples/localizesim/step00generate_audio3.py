@@ -25,7 +25,7 @@ MIC_POS      = MIC_CENTER + GEO # Receiver position [x y z] (m)
 make_sure_path_exists(RIRPATH)
 make_sure_path_exists(AUDIOPATH)
 
-for r,t60,a in itertools.product(range(18,20),[0.4,0.5,],range(0,360,5)):
+for r,t60,a in itertools.product([20],[0.4,0.5,],range(0,360,1)):
     
     filename = 'sim_c8_noise_t%03d_a%03d_r%02d.wav' % (int(t60*100),int(a),r)
     if (os.path.exists(AUDIOPATH+'/'+filename)):
