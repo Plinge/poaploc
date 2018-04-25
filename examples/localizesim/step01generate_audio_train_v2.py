@@ -21,41 +21,70 @@ FS = 48000           # Sample frequency (samples/s)
 NUMSAMPLES = 1<<15   # Number of samples            
 ROOM         = np.array([6,5,5])     # Room dimensions [x y z] (m)
 ROOM2        = np.array([5,4,3])     # Room dimensions [x y z] (m)
+
+def wallfar(p,room):
+    for dim in range(3):
+        if p[dim]<0.5:
+            return False
+        if ROOM[dim]-p[dim]<0.5:
+            return False
+    return True
+
+# mm=[];dd=[];hh=[]
+# for _ in range(100):
+#     
+#     dist = 0.7 + np.random.random_sample() * 1.3
+#     heig = 0.2 + np.random.random_sample() * 0.5
+#     offset = np.array( [ np.random.random_sample() * 3.0 - 1.5, np.random.random_sample() * 3.0 - 1.5,  np.random.random_sample() * 0.5 - 0.25 ] )
+#     m = ROOM2 / 2 + offset
+#     if not wallfar(m, ROOM2):
+#         continue
+#     ok=True
+#     for a in [0,90,180,270]:
+#         oo = np.array([dist*np.cos(a*np.pi/180.),dist*np.sin(a*np.pi/180.),heig]) 
+#         if not wallfar(m+oo, ROOM2):
+#             ok=False
+#         else:
+#             print m+oo
+#     if ok:
+#         mm.append(m)
+#         dd.append(dist)
+#         hh.append(heig)
+#         
+#     if len(mm)>8: 
+#         break
+# print
+# print mm
+# print dd
+# print hh
+# sys.exit(0)
+
+
 MIC_CENTERS  = np.array([
 [ 2.18609094,  3.08879343,  1.60610754],
-[ 3.28784210,  2.13980973,  1.25416981],
-[ 2.64151881,  2.94940339,  1.66644353],
-[ 3.34297847,  2.19302087,  1.35913821],
-[ 2.34832611,  2.55705603,  1.67644908],
-[ 2.34543316,  2.61919966,  1.55279962],
-[ 3.13171514,  2.06510181,  1.66115169],
-[ 3.05575952,  2.77312754,  1.70505226],
-[ 3.90952129,  2.35478356,  1.41101156],
-[ 3.21124699,  2.37349650,  1.36713422],
-[ 3.50627389,  2.61377493,  1.54937366],
-[ 3.46545925,  2.06965704,  1.64381688],
-])
-DISTS=[1.10610754,
-0.75416981,
-0.850645320243,
-0.85913821,
-1.17644908,
-0.889592537327,
-1.16115169,
-1.20505226,
-0.91101156,
-0.86713422,
-1.04937366,
-1.05163759288]
-    
+[ 1.80682374,  2.2414552 ,  1.2017824 ], 
+[ 2.13622852,  2.4613022 ,  1.20128401], 
+[ 2.46722745,  1.88017976,  0.99995121],
+[ 1.68993685,  3.0249535 ,  0.80806865], 
+[ 3.32456106,  1.44641776,  0.8616572 ], 
+[ 1.35303387,  1.71907313,  1.18785852], 
+[ 2.67672343,  3.11592682,  0.776473  ], 
+[ 3.10837709,  2.43301665,  1.15264701], 
+[ 2.01242434,  3.03967996,  0.78881824]])
 
+
+DISTS=[1.1061,1.0131059448856545, 1.5651661941536754, 0.9916259051440476, 1.0315978429771195, 0.9177406464822381, 0.7125837059765597, 1.1091980278315332, 0.7019514491870887, 1.130039765076737]
+
+HEIHGTS=[0.3,0.5603202560038713, 0.49757306794340384, 0.30131776796435195, 0.21216374071023852, 0.4311553149797613, 0.6820993924916054, 0.29903433242065425, 0.38229889633530206, 0.24935086099707432]
+        
+    
 make_sure_path_exists(RIRPATH)
 make_sure_path_exists(AUDIOPATH)
 
-for run,t60 in itertools.product(range(6),[0.3,0.45,0.6]):
+for run,t60 in itertools.product(range(10),[0.3,0.45,0.6]):
     
     r = run + 30
-    
+    room = ROOM if r<5 else ROOM2 
     angles = range(0,360,5)
     np.random.shuffle(angles)
     for a in angles:
@@ -66,8 +95,15 @@ for run,t60 in itertools.product(range(6),[0.3,0.45,0.6]):
         if os.path.exists(rirfilename):
             rirs = np.load(rirfilename)
             print 'loaded', rirfilename
-        else:        
-            s = MIC_CENTERS[run] + np.array([DISTS[run]*np.cos(a*np.pi/180.),DISTS[run]*np.sin(a*np.pi/180.),0.3])
+        else:      
+            mic_center = MIC_CENTERS[run]  
+            s = mic_center + np.array([DISTS[run]*np.cos(a*np.pi/180.),DISTS[run]*np.sin(a*np.pi/180.),HEIHGTS[run]])
+            
+            if not wallfar(mic_center,room):
+                raise Exception('microphones too close to the wall')
+            if not wallfar(s,room):
+                raise Exception('speaker too close to the wall')
+                                
             micpos = MIC_CENTERS[run] + GEO 
                                          
             print 'computing rirs'  , rirfilename

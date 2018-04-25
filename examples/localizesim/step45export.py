@@ -76,8 +76,8 @@ def exportfull(mode,average):
 
     themax = []
         
-    trainfiles = getrunfiles(mode,range(0,12))        
-    validfiles = getrunfiles(mode,range(12,18))
+    trainfiles = getrunfiles(mode,range(0,5))        
+    validfiles = getrunfiles(mode,range(5,10))
     testfiles = getrunfiles(mode,range(18,24))
         
     step = 1
@@ -123,10 +123,10 @@ def exportfull(mode,average):
         print 'test ', test_shape
     print outfile
 
-exportfull('3a_m6_fg',20)
+#exportfull('3a_m6_fg',20)
 exportfull('3a_m6_fg',0)
 
-exportfull('3a_m6_dg',20)
-exportfull('3a_m6_dg',0)
+#exportfull('3a_m6_dg',20)
+#exportfull('3a_m6_dg',0)
 
 
