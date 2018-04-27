@@ -29,7 +29,7 @@ ARG_CFG = {
 
 make_sure_path_exists(WORKPATH)
 ALLWAVS = glob.glob(AUDIOPATH+'\*.wav')
-np.random.shuffle(ALLWAVS)
+#np.random.shuffle(ALLWAVS)
 print len(ALLWAVS),'wav files'
 for (fileindex,filepath) in enumerate(ALLWAVS):
     for ((cfg,cfg_arg),(gain,gain_arg)) in itertools.product(ARG_CFG.iteritems(),ARG_GAIN.iteritems()):

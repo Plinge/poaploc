@@ -7,7 +7,7 @@ Created on 24.02.2018
 import sys,os
 from numpy import fabs
 from numba.types import none
-import math
+import math, time
 sys.path.append('../python')
 import rirgenerator as RG
 import numpy as np
@@ -109,9 +109,12 @@ for run,t60 in itertools.product(range(10),[0.3,0.45,0.6]):
             m = np.mean(micpos,0)
             print 'source', np.round(s,2),'dist',np.round(DISTS[run],2),  'mic', np.round (m,2),'elevation %.1f' % (180.0/np.pi * math.atan2(s[2]-m[2],math.pow(s[0]-m[0],2) +math.pow(s[1]-m[1],2) ))
                                          
+            start = time.clock()                                     
             print 'computing rirs'  , rirfilename
             rirs = RG.rir_generator(SPEEDOFSOUND, FS, micpos, s, ROOM, beta=t60, nsample=NUMSAMPLES, mtype='omnidirectional', hp_filter = 1)
-            print rirs.shape
+            elapsed = time.clock()
+            elapsed = elapsed - start
+            print rirs.shape, ('%.3fs'%elapsed)
             np.save(rirfilename,rirs)
             
         SIGNAL = np.random.random((FS*2.2,))

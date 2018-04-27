@@ -49,14 +49,18 @@ def exportit(step,length,files,average,shuffle=False):
             testxx=[np.vstack(testxx),]
             testyy=[np.vstack(testyy),]
   
+  
+    if len(testxx)<2:
+        raise Exception('no data?')
+        
     if shuffle:      
         ii = range(len(testxx)) 
         np.random.shuffle(ii)               
         testxx = np.vstack([testxx[i] for i in ii])
         testyy = np.vstack([testyy[i] for i in ii])
     else:
-        testxx = np.vstack(testxx[i])
-        testyy = np.vstack(testyy[i])
+        testxx = np.vstack(testxx)
+        testyy = np.vstack(testyy)
     
     print
     print testxx.shape , '->', testyy.shape    
@@ -66,9 +70,12 @@ def exportit(step,length,files,average,shuffle=False):
 def getrunfiles(mode,runs,shuffle=False):
     res = []
     for r in runs:
-        res += glob.glob(WORKPATH+'cor_*_r'+('%02d_'% r)+mode+'.npy'  )
+        pat = WORKPATH+'cor_*_r'+('%02d_'% r)+mode+'.npy' 
+        res += glob.glob(pat)
     if shuffle:
         np.random.shuffle(res)
+    if len(res)<1:
+        raise Exception('No files for '+pat)
     return res
 
 def exportfull(mode,average):
@@ -76,14 +83,14 @@ def exportfull(mode,average):
 
     themax = []
         
-    trainfiles = getrunfiles(mode,range(0,5))        
-    validfiles = getrunfiles(mode,range(5,10))
+    trainfiles = getrunfiles(mode,range(30,35))        
+    validfiles = getrunfiles(mode,range(35,40))
     testfiles = getrunfiles(mode,range(18,24))
         
     step = 1
     if average>1:        
         step = max(1, average/4)
-    outfile = CNNINPUTPATH + '/noise_pfl_more_'+mode+('_w%02d'%average)+'.hdf5' 
+    outfile = CNNINPUTPATH + '/noise_circ_'+mode+('_w%02d'%average)+'.hdf5' 
     with h5py.File( outfile, "w") as f:        
 #         l4 = len(trainfiles)/8
 #         for stride in range(9):        
