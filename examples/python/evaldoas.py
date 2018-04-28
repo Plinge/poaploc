@@ -8,6 +8,7 @@ import numpy as np
 import angles
 import pandas as pd
 from angles import make360
+from feats import running_mean
 
 def _get_fpr(tp,fp,fn):
     f,pr,re=0.0,0.0,0.0
@@ -127,10 +128,17 @@ def load_em_as_ta(filename):
     del data
     return res
 
-def load_nhot_as_ta(filename,framestep,doaresolution=5.,thres=0.5,roll=0,singlesource=False):
+def load_nhot_as_ta(filename,framestep,doaresolution=5.,thres=0.5,roll=0,singlesource=False,collate=None):
     data = np.load(filename)
     if roll != 0:
         data = np.roll(data,roll,1)
+    if collate is not None:
+        data = running_mean(data,collate)
+        timeoffset = collate*0.5*framestep
+        downsample=max(1,collate/4)
+        if downsample>1:
+            data = data[::downsample]
+            framestep*=downsample
     res={}
     if singlesource:
         for frameindex, entry in enumerate(data):
