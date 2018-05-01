@@ -29,16 +29,30 @@ ARG_CFG = {
 
 make_sure_path_exists(WORKPATH)
 ALLWAVS = glob.glob(AUDIOPATH+'\*.wav')
-#np.random.shuffle(ALLWAVS)
-print len(ALLWAVS),'wav files'
-for (fileindex,filepath) in enumerate(ALLWAVS):
+print len(ALLWAVS),'wav files total'
+
+if REDO:
+    thewavs=ALLWAVS
+else:
+    thewavs=[]
+    for filepath in ALLWAVS:
+        for ((cfg,cfg_arg),(gain,gain_arg)) in itertools.product(ARG_CFG.iteritems(),ARG_GAIN.iteritems()):
+            cfgstr = '_'.join((cfg, gain))
+            scenario = os.path.basename(filepath).replace('.wav','')
+            npypath = WORKPATH + "cor_"+ scenario +'_'+ cfgstr + '.npy' 
+            if not os.path.exists(npypath):
+                thewavs.append(filepath)
+                break
+
+np.random.shuffle(thewavs)
+print len(thewavs),'wav files to process'
+for (fileindex,filepath) in enumerate(thewavs):
     for ((cfg,cfg_arg),(gain,gain_arg)) in itertools.product(ARG_CFG.iteritems(),ARG_GAIN.iteritems()):
         cfgstr = '_'.join((cfg, gain))
         scenario = os.path.basename(filepath).replace('.wav','')
         npypath = WORKPATH + "cor_"+ scenario +'_'+ cfgstr + '.npy' 
         if (os.path.exists(npypath)) and not REDO:
             continue
-        print fileindex+1,'/',len(ALLWAVS),('  %.2f%%' % ((fileindex+1.0)*100.0/len(ALLWAVS))) 
         spikedpath = TEMPPATH + scenario +'_'+ cfgstr + '.csv' 
         res = compute_poaptdoa(filepath,
                          '--quiet ' +  ' '.join((ARG_ALL,cfg_arg,gain_arg))  ,
@@ -46,3 +60,4 @@ for (fileindex,filepath) in enumerate(ALLWAVS):
         np.save(npypath, res)
         os.unlink(spikedpath)
         print npypath, res.shape, res.min(), '..', res.max()
+    print fileindex+1,'/',len(thewavs),('  %.2f%%' % ((fileindex+1.0)*100.0/len(thewavs))),"\n" 

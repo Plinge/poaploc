@@ -97,40 +97,37 @@ HEIHGTS=[0.3,0.5603202560038713, 0.49757306794340384, 0.30131776796435195, 0.212
 make_sure_path_exists(RIRPATH)
 make_sure_path_exists(AUDIOPATH)
 
-for run,t60 in itertools.product(range(0,20),[0.15,0.3,0.45,0.6]):
+for run,t60 in itertools.product(range(5),[0.15,0.3,0.45,0.6]):
     
-    r = run + 30
-    if r<5:
-        room = ROOM  
-    elif r<10:
-        room = ROOM2
-    elif r<15:
-        room = ROOM3
-    else:
-        room = ROOM4
+    r = run + 50
+    room = ROOM4
+    mic_center = MIC_CENTERS[15+run]
+    dist = DISTS[15+run]  
     rirsamples = min( NUMSAMPLES, t60*FS)
     angles = range(0,360,5)
     np.random.shuffle(angles)
-    for a in angles:
-        filename = 'sim_c8_noise_t%03d_a%03d_r%02d.wav' % (int(t60*100),int(a),r)
+    elevations=range(0,30,5)
+    for a,e in itertools.product(angles,elevations):
+
+        filename = 'sim_c8_noise_t%03d_a%03d_e%02d_r%02d.wav' % (int(t60*100),int(a),int(e),r)
         if (os.path.exists(AUDIOPATH+'/'+filename)):
             continue    
-        rirfilename = RIRPATH + 'rir_c8_t%03d_a%03d_r%02d.npy' % (int(t60*100),int(a),r)             
+        rirfilename = RIRPATH + 'rir_c8_t%03d_a%03d_e%02d_r%02d.npy' % (int(t60*100),int(a),int(e),r)             
         if os.path.exists(rirfilename):
             rirs = np.load(rirfilename)
             print 'loaded', rirfilename
         else:      
-            mic_center = MIC_CENTERS[run]  
-            s = mic_center + np.array([DISTS[run]*np.cos(a*np.pi/180.),DISTS[run]*np.sin(a*np.pi/180.),HEIHGTS[run]])
+            print rirfilename
+            s = mic_center + np.array([dist*np.cos(a*np.pi/180.),dist*np.sin(a*np.pi/180.),dist*np.sin(e*np.pi/180.)])
             
             if not wallfar(mic_center,room):
                 raise Exception('microphones too close to the wall')
             if not wallfar(s,room):
                 raise Exception('speaker too close to the wall')
                                 
-            micpos = MIC_CENTERS[run] + GEO 
+            micpos = mic_center + GEO 
             m = np.mean(micpos,0)
-            print 'source', np.round(s,2),'dist',np.round(DISTS[run],2),  'mic', np.round (m,2),'elevation %.1f' % (180.0/np.pi * math.atan2(s[2]-m[2],math.pow(s[0]-m[0],2) +math.pow(s[1]-m[1],2) ))
+            print 'source', np.round(s,2),'dist',np.round(dist,2),  'mic', np.round (m,2),'elevation %.1f' % (180.0/np.pi * math.atan2(s[2]-m[2],math.pow(s[0]-m[0],2) +math.pow(s[1]-m[1],2) ))
                                          
             start = time.clock()                                     
             print 'computing rirs'  , rirfilename

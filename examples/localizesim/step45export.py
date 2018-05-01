@@ -20,15 +20,13 @@ def exportit(step,length,files,average,shuffle=False):
     testxx=[]
     testyy=[]
     for i,filepath in enumerate(files):
-        if ((i+1)&31) == 0:
-            print i+1,'/ ',len(files) , "\r", #filepath
         test_x = np.load(filepath)        
         doaa = os.path.basename(filepath).split('_')[5]
         doa  = int(doaa[1:])
         datalen = test_x.shape[0]
         if average>1:
             test_x = running_mean(test_x, average)        
-        for offset in range(0,datalen-average,step):
+        for offset in range(0,datalen-average-2,step):
             xx = test_x[offset:offset+length,:,:,:]
             if xx.shape[0] != length:
                 print 'flawed logic'
@@ -45,12 +43,13 @@ def exportit(step,length,files,average,shuffle=False):
             test_y = np.zeros((length,360/DOA_RESOLUTION),dtype=np.int8) 
             test_y[:  , int( make360(doa+0.5*DOA_RESOLUTION))/DOA_RESOLUTION] = 1                 
             testyy.append(test_y)
-        if (i+1)&64 == 0:
+        if (i+1)&63 == 0:
             testxx=[np.vstack(testxx),]
             testyy=[np.vstack(testyy),]
+            print i+1,'/ ',len(files),' .. ',len(testyy[0]) , "\r", #filepath
   
   
-    if len(testxx)<2:
+    if len(testxx)<1:
         raise Exception('no data?')
         
     if shuffle:      
@@ -84,6 +83,7 @@ def exportfull(mode,average):
     themax = []
         
     trainfiles = getrunfiles(mode,range(30,35))        
+    trainfiles+= getrunfiles(mode,range(40,60))        
     validfiles = getrunfiles(mode,range(35,40))
     testfiles = getrunfiles(mode,range(18,24))
         
@@ -130,10 +130,9 @@ def exportfull(mode,average):
         print 'test ', test_shape
     print outfile
 
-#exportfull('3a_m6_fg',20)
+exportfull('3a_m6_fg',20)
 exportfull('3a_m6_fg',0)
-
-#exportfull('3a_m6_dg',20)
-#exportfull('3a_m6_dg',0)
+exportfull('3a_m6_dg',20)
+exportfull('3a_m6_dg',0)
 
 
