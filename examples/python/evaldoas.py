@@ -8,6 +8,7 @@ import numpy as np
 import angles
 import pandas as pd
 from angles import make360
+from feats import running_mean
 
 def _get_fpr(tp,fp,fn):
     f,pr,re=0.0,0.0,0.0
@@ -41,7 +42,7 @@ def load_gt_as_ta(filename):
     data = pd.read_csv(filename,sep='\s',engine='python')
     len  = data.time.size
     res={}
-    for index in xrange(len):
+    for index in range(len):
         t = data.time[index]
         if not t in res.keys():
             res[t]=[]
@@ -53,7 +54,7 @@ def load_gt_as_xy(filename):
     data = pd.read_csv(filename,sep='\s',engine='python')
     len  = data.time.size
     x,y=[],[]
-    for index in xrange(len):
+    for index in range(len):
         x.append( data.time[index] )
         y.append(-data.angle[index])
     del data
@@ -64,7 +65,7 @@ def load_gt_as_framed(filename, framestep):
     frames = int( np.ceil( data.time.max() / float(framestep) ) )
     res=np.ones((frames,int(data.person.max()-1))) * -999
     lastindex=0
-    for frameindex in xrange(frames):
+    for frameindex in range(frames):
         index = lastindex
         firstindex=None
         frametime = frameindex * float(framestep) 
@@ -92,7 +93,7 @@ def load_gt_as_nhot(filename, framestep, doares=5.):
     frames = int( np.ceil( data.time.max() / float(framestep) ) )
     res=np.zeros((frames,int(360/doares)),dtype=np.byte) 
     lastindex=0
-    for frameindex in xrange(int( np.floor( data.time.min() / float(framestep) ) ), frames):
+    for frameindex in range(int( np.floor( data.time.min() / float(framestep) ) ), frames):
         index = lastindex
         firstindex=None
         frametime = frameindex * float(framestep) 
@@ -119,7 +120,7 @@ def load_gt_as_nhot(filename, framestep, doares=5.):
 def load_em_as_ta(filename):
     data = np.load(filename)
     res={}
-    for index in xrange(data.shape[0]):
+    for index in range(data.shape[0]):
         t = data[index,1]
         if not t in res.keys():
             res[t]=[]
@@ -127,10 +128,17 @@ def load_em_as_ta(filename):
     del data
     return res
 
-def load_nhot_as_ta(filename,framestep,doaresolution=5.,thres=0.5,roll=0,singlesource=False):
+def load_nhot_as_ta(filename,framestep,doaresolution=5.,thres=0.5,roll=0,singlesource=False,collate=None):
     data = np.load(filename)
     if roll != 0:
         data = np.roll(data,roll,1)
+    if collate is not None:
+        data = running_mean(data,collate)
+        timeoffset = collate*0.5*framestep
+        downsample=max(1,collate/4)
+        if downsample>1:
+            data = data[::downsample]
+            framestep*=downsample
     res={}
     if singlesource:
         for frameindex, entry in enumerate(data):
@@ -169,7 +177,7 @@ def eval_ta(gt,de,window=0.13,maxdoaerror=15):
         de_doas = np.array(de[de_time])
         [midi,dists,list1,list2per] = angles_min_dist_permutation(gt_doas, de_doas)
         errors.extend(dists)
-        tt = len(filter(lambda x:x<=maxdoaerror, dists))
+        tt = len(list(filter(lambda x:x<=maxdoaerror, dists)))
         tp = tp + tt
         fn = fn + len(gt_doas)-tt
         if len(de_doas)>len(gt_doas):
@@ -190,6 +198,6 @@ def string_result(rmse,bias,f,pr,re):
 
     
 def print_result(rmse,bias,f,pr,re):    
-    print string_result
+    print(string_result)
                 
         
