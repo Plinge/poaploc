@@ -20,6 +20,7 @@ make_sure_path_exists( CNNINPUTPATH )
 def exportit(files,shuffle=False):
     testxx=[]
     testyy=[]
+    pairx=[];pairy=[]
     hann = scipy.signal.hanning(512)
     for i,filepath in enumerate(files):
         audiodata, fs = soundfile.read(filepath)
@@ -40,11 +41,28 @@ def exportit(files,shuffle=False):
         doa  = int(doaa[1:])
         datalen = test_x.shape[0]
             
-        test_y = np.zeros((datalen,360/DOA_RESOLUTION),dtype=np.int8) 
-        test_y[:  , int( make360(doa+0.5*DOA_RESOLUTION))/DOA_RESOLUTION] = 1
+        #test_y = np.zeros((datalen,360/DOA_RESOLUTION),dtype=np.int8) 
+        #test_y[:  , int( make360(doa+0.5*DOA_RESOLUTION))/DOA_RESOLUTION] = 1
         
-        testxx.append(test_x)      
-        testyy.append(test_y)                 
+        pairx.append(test_x)      
+        pairy.append(int( make360(doa+0.5*DOA_RESOLUTION))/DOA_RESOLUTION)                 
+            
+        if len(pairy)==2:
+            pairx  = np.vstack(pairx)
+            datalen = pairx.shape[0]
+            shuf = list(range(datalen))
+            
+            for k in range(256):
+                np.random.shuffle(shuf)
+                for m in range(8):
+                    fres = [pairx[i,k,m,0] for i in shuf]
+                    pairx[:,k,m,0] = fres
+            
+            testxx.append(pairx)
+            test_y = np.zeros((datalen,360/DOA_RESOLUTION),dtype=np.int8) 
+            test_y[:, pairy[0]] = 1
+            test_y[:, pairy[1]] = 1
+            testyy.append(test_y)
             
         if (i+1)&63 == 0:
             testxx=[np.vstack(testxx),]
@@ -85,10 +103,10 @@ def exportfull():
 
     themax = []
         
-    trainfiles = getrunfiles(range(30,35))        
-    trainfiles+= getrunfiles(range(40,50))        
-    validfiles = getrunfiles(range(35,40))
-    testfiles = getrunfiles(range(18,24))
+    trainfiles = getrunfiles(range(30,35),True)        
+    trainfiles+= getrunfiles(range(40,50),True)        
+    validfiles = getrunfiles(range(35,40),True)
+    testfiles = getrunfiles(range(18,24),True)
         
     step = 1
     
