@@ -106,7 +106,7 @@ for run,t60 in itertools.product(range(5),[0.15,0.3,0.45,0.6]):
     rirsamples = min( NUMSAMPLES, t60*FS)
     angles = range(0,360,5)
     np.random.shuffle(angles)
-    elevations=range(0,30,5)
+    elevations=range(0,35,5)
     for a,e in itertools.product(angles,elevations):
 
         filename = 'sim_c8_noise_t%03d_a%03d_e%02d_r%02d.wav' % (int(t60*100),int(a),int(e),r)

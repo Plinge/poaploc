@@ -24,7 +24,7 @@ for task in sorted(FILES.keys()):
     
     print evaldoas.string_result(*r), 'ICASSP2012 paper'
 
-    results = sorted(glob.glob(WORKPATH+'aem_'+task+"*_a0*.npy"))
+    results = sorted(glob.glob(WORKPATH+'aem_'+task+"*m6_fg_*a0*.npy"))
     rr=[]
     for result in results:
         de = evaldoas.load_em_as_ta(result)
@@ -34,5 +34,7 @@ for task in sorted(FILES.keys()):
         (rmse,bias,f,pr,re) = r
         rr.append( ( f,evaldoas.string_result(*r)+ '  ' + os.path.basename(result) ) )
         
+        
+    
     for (f, resstr) in sorted(rr, key = lambda (f,s) : f , reverse=True):
         print resstr

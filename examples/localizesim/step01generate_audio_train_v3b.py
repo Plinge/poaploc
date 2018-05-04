@@ -97,7 +97,7 @@ HEIHGTS=[0.3,0.5603202560038713, 0.49757306794340384, 0.30131776796435195, 0.212
 make_sure_path_exists(RIRPATH)
 make_sure_path_exists(AUDIOPATH)
 
-for run,t60 in itertools.product([0],[0.45,0.15,0.3,0.6]):
+for run,t60 in itertools.product(range(5),[0.45,0.15,0.3,0.6]):
     
     r = run + 55
     room = ROOM

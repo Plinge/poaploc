@@ -4,7 +4,7 @@ Created on 04.02.2018
 @author: pli
 '''
 ''' adust these paths as necessary '''
-DATAPATH = "C:/data/iwaenc2012ast_dortmund/" 
+DATAPATH = "../../../iwaenc2012ast_dortmund/" 
 WORKPATH  = './data/'
 AUDIOPATH = DATAPATH+"data/"
 
