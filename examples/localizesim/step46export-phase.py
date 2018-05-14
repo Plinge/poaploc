@@ -13,16 +13,17 @@ from paths import make_sure_path_exists
 from feats import running_mean, spikenorm
 import soundfile
 import scipy.signal, scipy.fftpack
+import itertools
+
 make_sure_path_exists( CNNINPUTPATH )
-
-
         
-def exportit(files,shuffle=False):
+def exportconc(files):
     testxx=[]
     testyy=[]
     pairx=[];pairy=[]
     hann = scipy.signal.hanning(512)
-    for i,filepath in enumerate(files):
+    for fileindex,filepath in enumerate(files):
+        #print filepath
         audiodata, fs = soundfile.read(filepath)
         test_x = []
         for i in range(256*4, audiodata.shape[0]-256*4, 256):
@@ -39,11 +40,7 @@ def exportit(files,shuffle=False):
         #test_x = np.load(filepath)        
         doaa = os.path.basename(filepath).split('_')[4]
         doa  = int(doaa[1:])
-        datalen = test_x.shape[0]
-            
-        #test_y = np.zeros((datalen,360/DOA_RESOLUTION),dtype=np.int8) 
-        #test_y[:  , int( make360(doa+0.5*DOA_RESOLUTION))/DOA_RESOLUTION] = 1
-        
+      
         pairx.append(test_x)      
         pairy.append(int( make360(doa+0.5*DOA_RESOLUTION))/DOA_RESOLUTION)                 
             
@@ -51,79 +48,71 @@ def exportit(files,shuffle=False):
             pairx  = np.vstack(pairx)
             datalen = pairx.shape[0]
             shuf = list(range(datalen))
-            
             for k in range(256):
                 np.random.shuffle(shuf)
                 for m in range(8):
                     fres = [pairx[i,k,m,0] for i in shuf]
                     pairx[:,k,m,0] = fres
-            
             testxx.append(pairx)
+            
             test_y = np.zeros((datalen,360/DOA_RESOLUTION),dtype=np.int8) 
             test_y[:, pairy[0]] = 1
             test_y[:, pairy[1]] = 1
             testyy.append(test_y)
-            
-        if (i+1)&63 == 0:
+            pairx=[];pairy=[]  
+        if (fileindex+1)&63 == 0:
             testxx=[np.vstack(testxx),]
             testyy=[np.vstack(testyy),]
-            print i+1,'/ ',len(files),' .. ',len(testyy[0]) , "\r", #filepath
-  
+            #print fileindex+1,'/ ',len(files),' .. ',len(testyy[0]) , ' - ',(len(testyy[0])*2)/(fileindex+1), "\r", #filepath
   
     if len(testxx)<1:
         raise Exception('no data?')
-        
-    if shuffle:      
-        ii = range(len(testxx)) 
-        np.random.shuffle(ii)               
-        testxx = np.vstack([testxx[i] for i in ii])
-        testyy = np.vstack([testyy[i] for i in ii])
-    else:
-        testxx = np.vstack(testxx)
-        testyy = np.vstack(testyy)
-    
-    print
-    print testxx.shape , '->', testyy.shape    
-       
+    testxx = np.vstack(testxx)
+    testyy = np.vstack(testyy)    
+    #print
+    #print testxx.shape , '->', testyy.shape           
     return testxx, testyy
 
-def getrunfiles(runs,shuffle=False):
-    res = []
-    for r in runs:
-        pat = AUDIOPATH + 'sim_c8_noise*_r'+('%02d'% r)+'.wav' 
-        res += glob.glob(pat)
-    if shuffle:
-        np.random.shuffle(res)
-    if len(res)<1:
-        raise Exception('No files for '+pat)
-    return res
-
+def exportruns(runs):
+    print 'gathering...'    
+    xx,yy=[],[]
+    for run,t60 in itertools.product(runs,(15,30,45,60,40,50)):        
+        pat = AUDIOPATH + 'sim_c8_noise*_t'+('%03d'%t60)+'_*_r'+('%02d'% run)+'.wav' 
+        files = glob.glob(pat)
+        if len(files)<1:
+            continue
+        print ('%4d'%len(files)),'for',pat        
+        np.random.shuffle(files)
+        x,y = exportconc(files)
+        xx.append(x);yy.append(y)
+        
+    xx,yy = np.vstack(xx),np.vstack(yy)
+    print
+    print xx.shape , '->', yy.shape    
+    return xx, yy
+       
 def exportfull():
     global themax  
-
     themax = []
+    #trainruns  = list(range(30,35))        
+    #trainruns += list(range(40,60))
+    trainruns  = list(range(50,60))        
+    validruns = list(range(35,40))
+    testruns = list(range(18,24))
         
-    trainfiles = getrunfiles(range(30,35),True)        
-    trainfiles+= getrunfiles(range(40,50),True)        
-    validfiles = getrunfiles(range(35,40),True)
-    testfiles = getrunfiles(range(18,24),True)
-        
-    step = 1
-    
-    outfile = CNNINPUTPATH + '/noise_circ_phase'+'.hdf5' 
+    outfile = CNNINPUTPATH + '/noise_circ_conc_phase'+'.hdf5' 
     with h5py.File( outfile, "w") as f:        
- 
-        x,y = exportit(trainfiles)
+        x,y = exportruns(trainruns)            
         f.create_dataset('X_train', data=x, dtype=np.float16)
         f.create_dataset('Y_train', data=y, dtype=np.int8)
         train_shape = x.shape
         
-        x,y = exportit(validfiles)
+        x,y = exportruns(validruns)
         f.create_dataset('X_valid', data=x, dtype=np.float16)
         f.create_dataset('Y_valid', data=y, dtype=np.int8)
         valid_shape = x.shape
         
-        x,y = exportit(testfiles)
+        x,y = exportruns(testruns)
         f.create_dataset('X_test', data=x, dtype=np.float16)
         f.create_dataset('Y_test', data=y, dtype=np.int8)
         test_shape = x.shape
@@ -134,5 +123,3 @@ def exportfull():
     print outfile
 
 exportfull()
-
-

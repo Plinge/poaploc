@@ -130,9 +130,9 @@ def exportfull(mode,average):
         print 'test ', test_shape
     print outfile
 
-exportfull('3a_m6_fg',20)
 exportfull('3a_m6_fg',0)
-exportfull('3a_m6_dg',20)
-exportfull('3a_m6_dg',0)
+#exportfull('3a_m6_fg',20)
+#exportfull('3a_m6_dg',20)
+#exportfull('3a_m6_dg',0)
 
 
