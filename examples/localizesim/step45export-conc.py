@@ -62,11 +62,11 @@ def exportconc(files,step=1):
     #print testxx.shape , '->', testyy.shape           
     return testxx, testyy
 
-def exportruns(mode,runs,step=1):
+def exportruns(mode,runs,step=1,t60s=(15,30,45,60,40,50)):
     print 'gathering...'    
     xx,yy=[],[]
     runindex=0
-    for run,t60 in itertools.product(runs,(15,30,45,60,40,50)):        
+    for run,t60 in itertools.product(runs,t60s):        
         pat = WORKPATH + 'cor_sim_c8_noise_t'+('%03d'%t60)+'_*_r'+('%02d_'% run)+mode+'.npy' 
         #print pat
         files = glob.glob(pat)
@@ -75,16 +75,13 @@ def exportruns(mode,runs,step=1):
         print ('%4d'%len(files)),'for',pat        
         np.random.shuffle(files)
         x,y = exportconc(files,step)
-        xx.append(x);yy.append(y)
-        runindex+=1
-        if (runindex+1)&3 == 0:
-            xx=[np.vstack(xx),]
-            yy=[np.vstack(yy),]
+        if len(xx)<1:
+            xx=x;yy=y
+        else:
+            xx=np.vstack([xx,x]) ; yy=np.vstack([yy,y])
+            del x; del y
     if len(xx)<1:
-        return None,None        
-    xx,yy = np.vstack(xx),np.vstack(yy)
-    print
-    print xx.shape , '->', yy.shape    
+        return None,None                
     return xx, yy
        
 def exportfull(mode):
@@ -102,15 +99,14 @@ def exportfull(mode):
         #f.create_dataset('X_train', data=x, dtype=np.float16)
         #f.create_dataset('Y_train', data=y, dtype=np.int8)
         #train_shape = x.shape
-        l4 = len(trainruns)/3
-        for stride in range(4):        
-            trainslice = trainruns[stride*l4:(stride+1)*l4]
-            if len(trainslice)<1:
-                break
-            x,y = exportruns(mode,trainslice)
+        xset,yset=None,None
+        for run,t60set in itertools.product(trainruns,[(15,30,40),(45,60,50)]):        
+            trainslice = [run]            
+            x,y = exportruns(mode,trainslice,1,t60set)
             if x is None:
-                break
-            if stride == 0:                
+                continue
+            print x.shape , '->', y.shape
+            if xset is None:                
                 xset = f.create_dataset('X_train', data=x, dtype=np.float16, maxshape=(None, x.shape[1], x.shape[2],x.shape[3]))                
                 yset = f.create_dataset('Y_train', data=y, dtype=np.int8, maxshape=(None, y.shape[1]))
             else:
@@ -118,8 +114,8 @@ def exportfull(mode):
                 xset[-len(x):,:,:,:] = x
                 yset.resize(yset.shape[0]+len(y),axis=0)
                 yset[-len(y):,:] = y
-                print 'stride', stride+1, 'total=', xset.shape
-            del y,x                
+                print 'total=', xset.shape
+            #del y,x                
         train_shape = xset.shape
         
         
