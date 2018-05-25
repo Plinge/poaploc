@@ -14,6 +14,7 @@ from feats import running_mean, spikenorm
 import soundfile
 import scipy.signal, scipy.fftpack
 import itertools
+import tables
 
 make_sure_path_exists( CNNINPUTPATH )
         
@@ -24,7 +25,7 @@ def exportconc(files,step=1):
 
     for fileindex,filepath in enumerate(files):
         
-        test_x =  np.array( np.transpose(np.load(filepath), [0,3,2,1]),dtype=np.float16 )  
+        test_x =  np.array( np.transpose(np.load(filepath), [0,3,2,1]), dtype=np.float16 )  
         if step>1:
             test_x = test_x[::step,:,:,:]
         doaa = os.path.basename(filepath).split('_')[5]
@@ -94,39 +95,59 @@ def exportfull(mode):
     testruns = list(range(18,24))
         
     outfile = CNNINPUTPATH + '/noise_circ_conc_'+mode+'.hdf5' 
-    with h5py.File( outfile, "w") as f:        
+    with tables.openFile( outfile, mode="w") as f:        
         #x,y = exportruns(mode,trainruns)            
         #f.create_dataset('X_train', data=x, dtype=np.float16)
         #f.create_dataset('Y_train', data=y, dtype=np.int8)
         #train_shape = x.shape
-        xset,yset=None,None
+       
+        
+#         xset,yset=None,None
+#         for run,t60set in itertools.product(trainruns,[(15,30,40),(45,60,50)]):        
+#             trainslice = [run]            
+#             x,y = exportruns(mode,trainslice,1,t60set)
+#             if x is None:
+#                 continue
+#             print x.shape , '->', y.shape
+#             if xset is None:                
+#                 xset = f.create_dataset('X_train', data=x, dtype=np.float16, maxshape=(None, x.shape[1], x.shape[2],x.shape[3]))                
+#                 yset = f.create_dataset('Y_train', data=y, dtype=np.int8, maxshape=(None, y.shape[1]))
+#             else:
+#                 xset.resize(xset.shape[0]+len(x),axis=0)
+#                 xset[-len(x):,:,:,:] = x
+#                 yset.resize(yset.shape[0]+len(y),axis=0)
+#                 yset[-len(y):,:] = y
+#                 print 'total=', xset.shape
+#             #del y,x                
+#         train_shape = xset.shape
+
+        xset,yset=None,None        
         for run,t60set in itertools.product(trainruns,[(15,30,40),(45,60,50)]):        
             trainslice = [run]            
             x,y = exportruns(mode,trainslice,1,t60set)
-            if x is None:
-                continue
-            print x.shape , '->', y.shape
             if xset is None:                
-                xset = f.create_dataset('X_train', data=x, dtype=np.float16, maxshape=(None, x.shape[1], x.shape[2],x.shape[3]))                
-                yset = f.create_dataset('Y_train', data=y, dtype=np.int8, maxshape=(None, y.shape[1]))
-            else:
-                xset.resize(xset.shape[0]+len(x),axis=0)
-                xset[-len(x):,:,:,:] = x
-                yset.resize(yset.shape[0]+len(y),axis=0)
-                yset[-len(y):,:] = y
-                print 'total=', xset.shape
-            #del y,x                
+                xset = f.createEArray(f.root, 'X_train', 
+                                      tables.Atom.from_dtype(x.dtype),
+                                      shape=(0, x.shape[1], x.shape[2],x.shape[3]),
+                                      chunkshape=(1, x.shape[1], x.shape[2],x.shape[3]))
+                yset = f.createEArray(f.root, 'Y_train', 
+                                      tables.Atom.from_dtype(y.dtype),
+                                      shape=(0, y.shape[1]),
+                                      chunkshape=(1, y.shape[1]))
+            xset.append(x)
+            yset.append(y)
+            
         train_shape = xset.shape
         
         
-        x,y = exportruns(mode,validruns,4)
-        f.create_dataset('X_valid', data=x, dtype=np.float16)
-        f.create_dataset('Y_valid', data=y, dtype=np.int8)
+        x,y = exportruns(mode,[35],4)
+        f.createArray(f.root, 'X_valid', x)
+        f.createArray(f.root, 'Y_valid', y)
         valid_shape = x.shape
         
         x,y = exportruns(mode,testruns,4)
-        f.create_dataset('X_test', data=x, dtype=np.float16)
-        f.create_dataset('Y_test', data=y, dtype=np.int8)
+        f.createArray(f.root, 'X_test', x)
+        f.createArray(f.root, 'Y_test', y)
         test_shape = x.shape
                 
         print 'train', train_shape
