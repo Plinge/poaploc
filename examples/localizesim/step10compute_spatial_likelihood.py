@@ -14,45 +14,53 @@ sys.path.append("../python")
 from config import WORKPATH, TEMPPATH, AUDIOPATH, ARG_GEO
 
 ARG_ALL = '--precision 1 --elevation-precision 5 --min-likelihood 0.01 --skip 3 \
---post-min-bands 4 --post-min-energy=-40 \
+--post-min-energy=-40 \
 --sampling-frequency 48000 \
 --maxelevation --max-elevation 45 \
 --frame-length 12 --frame-step 6 \
 --post-min-bands 4 --post-min-energy=-40'
 
 ARG_MODE = {
-    'poa' : '',
+#    'poa' : '',
 #    'poap' : '--poap',
+    'max' : '--poap --sum-bands --argmax',
     }
 
 ARG_GAIN = {
-#'cg' :  "--gain-mode 0 --gain 40 --gain-max 24",
+'cg' :  "--gain-mode 0 --gain 40 --gain-max 24",
 #'dg' :  "--gain-mode 0 --gain 0 --gain-max 24",
 #'eg' :  "--gain-mode 3 --gain 40 --gain-smooth 0.05 --gain-max 24",
-'fg' :  "--gain-mode 3 --gain 0 --gain-smooth 0.05 --gain-max 24",
+#'fg' :  "--gain-mode 3 --gain 0 --gain-smooth 0.05 --gain-max 24",
 }
 
 ARG_CFG = { 
-#    '3a_g05_m6' : "--bands 16 --fmin 300 --fmax 3000 --gamma 0.5 --spike-mth 6 --spike-ath 0.0",
-    '3a_g03_m6' : "--bands 16 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",    
-#    '6a_g03_m6' : "--bands 24 --fmin 300 --fmax 6000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",    
-    }
+    #'04b3_g03_m6' : "--bands  4 --post-min-bands 1  --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",
+    #'08b3_g03_m6' : "--bands  8 --post-min-bands 2 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",    
+    '16b3_g03_m6' : "--bands 16 --post-min-bands 4 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",    
+    #'32b3_g03_m6' : "--bands 32 --post-min-bands 8 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",
+    #'16b6_g03_m6' : "--bands 16 --post-min-bands 4 --fmin 300 --fmax 6000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",    
+    #'32b6_g03_m6' : "--bands 32 --post-min-bands 8 --fmin 300 --fmax 6000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",  
+}
 
 ARG_POST = {
-   '5' : '--post-time 0.5',
+#   '5' : '--post-time 0.5',
 #   '1' : '--post-time 0.1',
-#    '0' : '',
-            }
+    '0' : '',
+}
 
 make_sure_path_exists(WORKPATH)
+outpath = WORKPATH + '/speechmax/'
+make_sure_path_exists(outpath)
 
 for ((mode,mode_arg),(cfg,cfg_arg),(gain,gain_arg),(post,post_arg)) in itertools.product(ARG_MODE.iteritems(),ARG_CFG.iteritems(),ARG_GAIN.iteritems(),ARG_POST.iteritems()):
     cfgstr = '_'.join((mode, cfg, gain, post))
-    
-    for (filepath) in glob.glob(AUDIOPATH+'\*a180_r0*.wav'):
-        scenario = os.path.basename(filepath).replace('.wav','')
+    prefix = 'msl'
+    if 'argmax' in mode_arg:
+        prefix = 'msn'    
+    for filepath in glob.glob(AUDIOPATH+'/sim_c8_speech_*.wav'):
+        scenario = os.path.basename(filepath.split('.')[-2])
         compute_poapmloc(filepath,
-                         '--quiet ' +  ' '.join((ARG_ALL,ARG_GEO,mode_arg,cfg_arg,gain_arg,post_arg))  ,
-                         'msl_' + scenario +'_'+ cfgstr,
+                         '--quiet ' +  ' '.join((ARG_ALL,ARG_GEO,mode_arg,cfg_arg,gain_arg,post_arg)),
+                         prefix + '_' + scenario +'_'+ cfgstr,
                          TEMPPATH + scenario +'_'+ cfgstr + '.csv' ,
-                         WORKPATH, redo=True)
+                         outpath, redo=False)
