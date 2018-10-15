@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
         cerr << endl;
         cerr << "PARAMETERS:" << endl;
         cerr << "--bands 16 --fmin 300 --fmax 3000 --bandwidth 1.0" << endl;
-        cerr << "Use  16 gammatone filters  with ERB spaced center frequnecies  between 300 and" << endl;
+        cerr << "Use  16 gammatone filters  with ERB spaced center frequencies  between 300 and" << endl;
         cerr << "3000 Hz and a Glaberg/Moore bandwith of 1 (default)." << endl;
         cerr << endl;
         cerr << "--gain 30 --frame-count 1024" << endl;
