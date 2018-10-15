@@ -141,13 +141,19 @@ def compute_poapmloc(filepath,args,table,csvpath,npypath,bands=16,redo=False):
     cmd2 = BINPATH + 'poapmloc  ' +args  
     cmd2 += ' ' + filepath
     cmd2 += ' >' + csvpath
-    
+    didcompute = False
     if not os.path.exists(csvpath) or redo:
         print cmd2        
         if os.system(cmd2) != 0:
             raise RuntimeError()
-    
-    export_poapmloc(table,csvpath,npypath,bands)
+        didcompute = True
+        
+    if not export_poapmloc(table,csvpath,npypath,bands):
+        if not didcompute:
+            print >>sys.stderr, "Redoing!"
+            if os.system(cmd2) != 0:
+                raise RuntimeError()
+            return export_poapmloc(table,csvpath,npypath,bands)
 
 def _get_npfile(table,csvpath,npypath,arrayIndex):
     npfile = npypath+table
@@ -157,7 +163,13 @@ def _get_npfile(table,csvpath,npypath,arrayIndex):
 
 def export_poapmloc(table,csvpath,npypath,bands=16):             
     #print FRAMERATE, BANDS
-    data = readcsv(csvpath)
+    try:
+        data = readcsv(csvpath)
+    except ValueError:
+        os.unlink(csvpath)
+        print >>sys.stderr, "File empty or broken", csvpath
+        return False
+    
     for arrayIndex in range(9):
         adata = data[data[:,1]==arrayIndex]
         if len(adata)<1:
@@ -169,6 +181,7 @@ def export_poapmloc(table,csvpath,npypath,bands=16):
         npfile =_get_npfile(table, csvpath, npypath, arrayIndex)
         np.save(npfile+'.npy',nn)
         print csvpath,'=>',npfile
+    return True
 
 import emtrack
 from npfiles import anglesFromMsl, clusteredAngleToRow

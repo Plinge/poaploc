@@ -9,11 +9,13 @@ import os
 EXTERNPATHBASE = "D:\\pli\\Experiments\\1804Loc\\"
 
 if os.path.exists(EXTERNPATHBASE):
+    SPEECHPATH  = EXTERNPATHBASE+'speech\\'
     WORKPATH  = EXTERNPATHBASE+'data\\'
     AUDIOPATH = EXTERNPATHBASE+'audio\\'
     RIRPATH   = EXTERNPATHBASE+'rirs/'
     CNNINPUTPATH   = EXTERNPATHBASE+'cnninput/'
 else:
+    SPEECHPATH  = './speech/'
     WORKPATH  = './data/'
     AUDIOPATH = './audio/'
     RIRPATH = './rirs/'

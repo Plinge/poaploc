@@ -23,25 +23,29 @@ NUMSAMPLES = 1<<15   # Number of samples
 make_sure_path_exists(RIRPATH)
 make_sure_path_exists(AUDIOPATH)
 
-for run,t60 in itertools.product(range(0,20),[0.15,0.3,0.45,0.6]):
-    
-    r = run + 30
-  
+for run,t60 in itertools.product(range(0,20),[0.15,0.3,0.45,0.6,0.75,0.9,1.05,1.2]):
+    r = run + 30  
     speaker = int(run/4) + 1
     speechfiles = glob.glob(SPEECHPATH+'/speech'+str(speaker)+'*.wav')
+    if len(speechfiles)<1:
+        print 'no speech files for', speaker
+        continue
     OUTSAMPLES = int(1.2 * FS)
     rirsamples = min( NUMSAMPLES, t60*FS)
     angles = range(0,360,5)
     np.random.shuffle(angles)
     for a in angles:
         filename = 'sim_c8_speech_t%03d_a%03d_r%02d.wav' % (int(t60*100),int(a),r)
-        #if (os.path.exists(AUDIOPATH+'/'+filename)):
-        #    continue    
+        if (os.path.exists(AUDIOPATH+'/'+filename)):
+            print filename, 'found'
+            continue    
         rirfilename = RIRPATH + 'rir_c8_t%03d_a%03d_r%02d.npy' % (int(t60*100),int(a),r)             
+        if not os.path.exists(rirfilename):            
+            continue
         print 'loading', rirfilename    
         if not os.path.exists(rirfilename):
-            raise 'missing rir'
-        
+            raise RuntimeError('missing rir')
+                    
         rirs = np.load(rirfilename)
         np.random.shuffle(speechfiles)            
         print 'loading', speechfiles[0]

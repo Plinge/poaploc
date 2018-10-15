@@ -9,13 +9,11 @@ import numpy as np
 from config import DOA_RESOLUTION, WORKPATH, CNNINPUTPATH
 from angles import make360
 import warnings
+import itertools
 from paths import make_sure_path_exists
 from feats import running_mean, spikenorm
-from blaze.expr.arithmetic import maxshape
 make_sure_path_exists( CNNINPUTPATH )
-
-
-        
+       
 def exportit(step,length,files,average,shuffle=False):
     testxx=[]
     testyy=[]
@@ -66,10 +64,10 @@ def exportit(step,length,files,average,shuffle=False):
        
     return testxx, testyy
 
-def getrunfiles(mode,runs,shuffle=False):
+def getrunfiles(mode,runs,t60s=[15,30,45],shuffle=False,type='noise'):
     res = []
-    for r in runs:
-        pat = WORKPATH+'cor_*_r'+('%02d_'% r)+mode+'.npy' 
+    for r, t in itertools.product(runs,t60s):
+        pat = WORKPATH+'cor_sim_c8_'+type+'_t'+('%03d' % t)+'*_r'+('%02d_'% r)+mode+'.npy' 
         res += glob.glob(pat)
     if shuffle:
         np.random.shuffle(res)
@@ -77,42 +75,56 @@ def getrunfiles(mode,runs,shuffle=False):
         raise Exception('No files for '+pat)
     return res
 
-def exportfull(mode,average):
+def exportfull(mode,average,small=0,t60s=[15,30,45,60]):
     global themax  
 
     themax = []
         
-    trainfiles = getrunfiles(mode,range(30,35))        
-    trainfiles+= getrunfiles(mode,range(40,60))        
-    validfiles = getrunfiles(mode,range(35,40))
-    testfiles = getrunfiles(mode,range(18,24))
-        
+    if small==1:
+        trainfiles = getrunfiles(mode,range(30,35),t60s)                      
+        desc = 'some'
+    elif small==2:
+        trainfiles = getrunfiles(mode,[30,40,45],t60s)                      
+        desc = 'few'
+    else:      
+        trainfiles = getrunfiles(mode,range(30,35),t60s)  
+        trainfiles+= getrunfiles(mode,range(40,60),t60s)
+        trainfiles+= getrunfiles(mode,range(18,24),t60s)                
+        desc = 'all'
+    if small==2:
+        validfiles = getrunfiles(mode,[37],t60s)
+    else:
+        validfiles = getrunfiles(mode,range(35,40),t60s)
+    if small==2:
+        testfiles = getrunfiles(mode,[35],t60s,False,'speech')
+    else:
+        testfiles = getrunfiles(mode,range(30,50),t60s,False,'speech')
     step = 1
     if average>1:        
         step = max(1, average/4)
-    outfile = CNNINPUTPATH + '/noise_circ_'+mode+('_w%02d'%average)+'.hdf5' 
+    outfile = CNNINPUTPATH + '/noise_'+desc+'_circ_'+mode+('_w%02d'%average)+'.hdf5' 
     with h5py.File( outfile, "w") as f:        
-#         l4 = len(trainfiles)/8
-#         for stride in range(9):        
-#             trainslice = trainfiles[stride*l4:(stride+1)*l4]
-#             if len(trainslice)<1:
-#                 break
-#             x,y = exportit(1,1,trainslice,average)
-#             if stride == 0:                
-#                 xset = f.create_dataset('X_train', data=x, dtype=np.float16, maxshape=(None, x.shape[1], x.shape[2],x.shape[3]))                
-#                 yset = f.create_dataset('Y_train', data=y, dtype=np.int8, maxshape=(None, y.shape[1]))
-#             else:
-#                 xset.resize(xset.shape[0]+len(x),axis=0)
-#                 xset[-len(x):,:,:,:] = x
-#                 yset.resize(yset.shape[0]+len(y),axis=0)
-#                 yset[-len(y):,:] = y
-#                 print 'stride', stride+1, 'total=', xset.shape
-#         del y,x                
-#         train_shape = xset.shape
-        x,y = exportit(1,1,trainfiles,average)
-        f.create_dataset('X_train', data=x, dtype=np.float16)
-        f.create_dataset('Y_train', data=y, dtype=np.int8)
-        train_shape = x.shape
+        l4 = len(trainfiles)/16
+        for stride in range(17):        
+            trainslice = trainfiles[stride*l4:(stride+1)*l4]
+            if len(trainslice)<1:
+                break
+            x,y = exportit(1,1,trainslice,average)
+            if stride == 0:                
+                xset = f.create_dataset('X_train', data=x, dtype=np.float16, maxshape=(None, x.shape[1], x.shape[2],x.shape[3]))                
+                yset = f.create_dataset('Y_train', data=y, dtype=np.int8, maxshape=(None, y.shape[1]))
+            else:
+                xset.resize(xset.shape[0]+len(x),axis=0)
+                xset[-len(x):,:,:,:] = x
+                yset.resize(yset.shape[0]+len(y),axis=0)
+                yset[-len(y):,:] = y
+                print 'stride', stride+1, 'total=', xset.shape
+        del y,x                
+        train_shape = xset.shape
+#         x,y = exportit(1,1,trainfiles,average)
+#         f.create_dataset('X_train', data=x, dtype=np.float16)
+#         f.create_dataset('Y_train', data=y, dtype=np.int8)
+#         train_shape = x.shape
         
         x,y = exportit(step,1,validfiles,average)
         f.create_dataset('X_valid', data=x, dtype=np.float16)
@@ -130,7 +142,9 @@ def exportfull(mode,average):
         print 'test ', test_shape
     print outfile
 
-exportfull('3a_m6_fg',0)
+#exportfull('3a_m6_fg',0,2)
+exportfull('3a_m6_cg',0,2)
+exportfull('3a_m6_cg',0,1)
 #exportfull('3a_m6_fg',20)
 #exportfull('3a_m6_dg',20)
 #exportfull('3a_m6_dg',0)

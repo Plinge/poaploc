@@ -20,6 +20,13 @@ def _get_fpr(tp,fp,fn):
         f = (2*pr*re)/(pr+re)
     return f, pr, re
 
+def _get_allstats(tp,fp,tn,fn):
+    stats={'tp':tp,'fp':fp,'tn':tn,'fn':fn}
+    stats['f'],stats['pr'],stats['re'] = _get_fpr(tp,fp,fn)    
+    stats['md'] = fn*100.0 / float(fn+tp) if fn+tp>0 else 0
+    stats['fa'] = fp*100.0 / float(fp+tn) if fp+tn>0 else 0
+    return stats
+
 def angles_min_dist_permutation(list1,list2):    
     l1 = len(list1);l2 = len(list2)    
     if l1>l2:
@@ -37,6 +44,87 @@ def angles_min_dist_permutation(list1,list2):
             midi=dist
             best=[midi,dists,list1,list2per]            
     return best
+
+def eval_static_doas(adata,framecount,gt,thres=15):
+    """
+    eval localization agianst static doa gt.
+    @return doaerror, doastd, f, precision, recall
+    """
+    if framecount is None:
+        framecount = int(np.max(adata[:,0]))
+    fp=0;tp=0;fn=0;tn=0
+    alldists = []
+    for frame in xrange(framecount):        
+        lo = adata[adata[:,0]==frame]
+        lo = lo[:,2]
+        #print frame,  gt, lo,
+        if len(gt)==0:
+            if len(lo)==0:
+                tn=tn+1
+            else:
+                fp=fp+len(lo)        
+        else:
+            if len(lo)==0:
+                fn += len(gt)
+            else:
+                _,dists,_,_ = angles_min_dist_permutation(gt, lo)
+                alldists.extend(dists)
+                tt = len(filter(lambda x:x<=thres, dists))
+                tp = tp + tt
+                fp = fp + len(dists)-tt
+                fn = fn + len(gt)-tt
+                if len(lo)>len(gt):
+                    fp = fp + len(lo)-len(gt)
+
+    stats = _get_allstats(tp,fp,tn,fn)
+    stats['err'], stats['std'] = np.mean(alldists), np.std(alldists)
+    return stats
+
+
+def eval_static_doas_windowed(adata,gt,maxtime,win=0.5,step=None,start=0.0,thres=15,verbose=False):
+    """
+    eval localization against static doa gt.
+    @return doaerror, doastd, f, precision, recall
+    """
+    if maxtime is None:
+        maxtime = np.max(adata[:,1])
+    if step is None:
+        step = win*0.5
+    fp=0;tp=0;fn=0;tn=0
+    alldists = []
+    for t in np.arange(start,maxtime,step):        
+        lo = adata[abs(adata[:,1]-t)<0.5*win]
+        lo = lo[:,2]
+        if len(gt)==0:
+            if len(lo)==0:
+                tn=tn+1
+            else:
+                fp=fp+len(lo)
+                if verbose:        
+                    print t, gt, lo,'FP'
+        else:
+            if len(lo)==0:
+                fn += len(gt)
+                if verbose:
+                    print t, gt, lo,'FN'
+            else:
+                _,dists,_,_ = angles_min_dist_permutation(gt, lo)
+                alldists.extend(dists)
+                tt = len(filter(lambda x:x<=thres, dists))
+                tp = tp + tt
+                fp = fp + len(dists)-tt
+                fn = fn + len(gt)-tt
+                if len(gt)!=tt:
+                    if verbose:
+                        print t,gt, lo,'FN'
+                if len(lo)>len(gt):
+                    fp = fp + len(lo)-len(gt)
+                    if verbose:
+                        print t,gt, lo,'FP'
+
+    stats = _get_allstats(tp,fp,tn,fn)
+    stats['err'], stats['std'] = np.mean(alldists), np.std(alldists)
+    return stats
 
 def load_gt_as_ta(filename):
     data = pd.read_csv(filename,sep='\s',engine='python')
@@ -115,7 +203,6 @@ def load_gt_as_nhot(filename, framestep, doares=5.):
             lastindex = firstindex           
     del data
     return res
-
     
 def load_em_as_ta(filename):
     data = np.load(filename)
@@ -195,7 +282,6 @@ def eval_ta_biased(gt,de,window=0.13,maxdoaerror=15):
 
 def string_result(rmse,bias,f,pr,re):    
     return ("RMSE %5.1f(%5.1f) deg "%(rmse,bias)) + ( "P %6.1f%% R %6.1f%% F1 %6.1f%%"%(pr,re,f))
-
     
 def print_result(rmse,bias,f,pr,re):    
     print(string_result)

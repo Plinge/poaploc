@@ -24,22 +24,23 @@ ARG_MODE = {
 #    'poa' : '',
 #    'poap' : '--poap',
     'max' : '--poap --sum-bands --argmax',
-    }
+}
 
 ARG_GAIN = {
 'cg' :  "--gain-mode 0 --gain 40 --gain-max 24",
 #'dg' :  "--gain-mode 0 --gain 0 --gain-max 24",
 #'eg' :  "--gain-mode 3 --gain 40 --gain-smooth 0.05 --gain-max 24",
-#'fg' :  "--gain-mode 3 --gain 0 --gain-smooth 0.05 --gain-max 24",
+'fg' :  "--gain-mode 3 --gain 0 --gain-smooth 0.05 --gain-max 24",
 }
 
 ARG_CFG = { 
-    #'04b3_g03_m6' : "--bands  4 --post-min-bands 1  --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",
-    #'08b3_g03_m6' : "--bands  8 --post-min-bands 2 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",    
+    '04b3_g03_m6' : "--bands  4 --post-min-bands 1 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",
+    '08b3_g03_m6' : "--bands  8 --post-min-bands 2 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",    
     '16b3_g03_m6' : "--bands 16 --post-min-bands 4 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",    
-    #'32b3_g03_m6' : "--bands 32 --post-min-bands 8 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",
+    '32b3_g03_m6' : "--bands 32 --post-min-bands 8 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",
     #'16b6_g03_m6' : "--bands 16 --post-min-bands 4 --fmin 300 --fmax 6000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",    
     #'32b6_g03_m6' : "--bands 32 --post-min-bands 8 --fmin 300 --fmax 6000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",  
+    #'16b3_g03_zc' : "--bands 16 --post-min-bands 4 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mode 3 --spike-ath 0.0",    
 }
 
 ARG_POST = {
@@ -57,10 +58,12 @@ for ((mode,mode_arg),(cfg,cfg_arg),(gain,gain_arg),(post,post_arg)) in itertools
     prefix = 'msl'
     if 'argmax' in mode_arg:
         prefix = 'msn'    
-    for filepath in glob.glob(AUDIOPATH+'/sim_c8_speech_*.wav'):
+    filelist = glob.glob(AUDIOPATH+'/sim_c8_speech_*.wav')
+    for fileindex,filepath in enumerate(filelist):
+        print 1+fileindex,'/',len(filelist),
         scenario = os.path.basename(filepath.split('.')[-2])
         compute_poapmloc(filepath,
-                         '--quiet ' +  ' '.join((ARG_ALL,ARG_GEO,mode_arg,cfg_arg,gain_arg,post_arg)),
+                         '--quiet ' + ' '.join((ARG_ALL,ARG_GEO,mode_arg,cfg_arg,gain_arg,post_arg)),
                          prefix + '_' + scenario +'_'+ cfgstr,
                          TEMPPATH + scenario +'_'+ cfgstr + '.csv' ,
                          outpath, redo=False)
