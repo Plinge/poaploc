@@ -175,6 +175,9 @@ public:
 
     inline void update(Audio::Wave &out, int channelIndex, int sampleIndex, double v, double a)
     {
+        if (isnan(v)) {
+            return;
+        }
         if (mode == ZC) {
             if (v<0) {
                 if (poaold>=0 && !half) {
@@ -182,6 +185,7 @@ public:
                      out.setSample(sampleIndex, channelIndex, spike);
                      sum=0.0;
                 }
+
             } else {
                 if (poaold<0) {
                     double spike = sum * energyFactor * 2.0;
@@ -191,9 +195,13 @@ public:
                         histogram->update(spike>0 ? 20.0*log10(spike): -360.0);
                     }
                 }
-            }
+            }            
             poaold = v;
-            sum += pow(v/32768.0,energyExponent);
+            double w = pow(fabs(v),energyExponent);
+            if (isnan(w)) {
+                return;
+            }
+            sum += w;
             return;
         }
 
@@ -223,7 +231,6 @@ public:
         if (poa <= 0) {
             if (poaold >= 0 && sum >= energyThreshold && poaMax > 0) {
                 double spike = sum * energyFactor * 2.0;
-
                 out.setSample(indexMax, channelIndex, spike);
                 if (histogram) {
                     histogram->update(spike>0 ? 20.0*log10(spike): -360.0);
