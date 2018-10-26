@@ -36,7 +36,7 @@ def normalize(s):
 
 def correlation_n(s,t):
     if s.shape != t.shape:
-        print  "shape mismatch",  s.shape, " ", t.shape
+        print ("shape mismatch",  s.shape, " ", t.shape)
         exit(2)
     corr = np.dot(s,t.T)
     return corr
@@ -44,7 +44,7 @@ def correlation_n(s,t):
 
 def correlation(s,t):
     if s.shape != t.shape:
-        print  "shape mismatch",  s.shape, " ", t.shape
+        print ("shape mismatch",  s.shape, " ", t.shape)
         exit(2)
     s = normalize(s)    
     t = normalize(t)
@@ -53,7 +53,7 @@ def correlation(s,t):
 
 def correlation1(s,t):
     if s.shape != t.shape:
-        print  "shape mismatch",  s.shape, " ", t.shape
+        print  ("shape mismatch",  s.shape, " ", t.shape)
         exit(2)
     corr = 0
     slen = 0

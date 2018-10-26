@@ -12,6 +12,7 @@ This is an implementation of the following paper:
 
 '''
 # libs
+from __future__ import print_function
 import itertools
 import os
 import platform
@@ -60,29 +61,29 @@ MODE_PRES = { 'msl' : ARGS_POST ,
               'msr' : '--post-time 0'}
 
 def compute_poapspikes(filepath,args,outfile,redo=False):
-    print outfile
+    print (outfile)
     cmd2 = BINPATH + 'poapify  ' +args  
     cmd2 += ' ' + filepath
     cmd2 += ' ' + outfile
     if not os.path.exists(outfile) or redo:
-        print cmd2        
+        print (cmd2)
         if os.system(cmd2) != 0:
             raise RuntimeError()
 
 def compute_poaptdoa(filepath,args,outfile,skip=0,redo=False):
-    print outfile
+    print (outfile)
     
     data, fs = soundfile.read(filepath)
     MICS = data.shape[1]
     TIME_MAX = float(data.shape[0]) / fs
     del data
-    print filepath, "has", MICS, "mics for", TIME_MAX, "s" 
+    print (filepath, "has", MICS, "mics for", TIME_MAX, "s" )
     
     cmd2 = BINPATH + 'poaptdoa --frame-length 12 --frame-step 6 ' +args  
     cmd2 += ' ' + filepath
     cmd2 += ' >' + outfile
     if not os.path.exists(outfile) or redo:
-        print cmd2        
+        print (cmd2)
         if os.system(cmd2) != 0:
             raise RuntimeError()
     
@@ -103,7 +104,7 @@ def compute_poaptdoa(filepath,args,outfile,skip=0,redo=False):
             
             index=index+1            
             if index==1:
-                print line
+                print (line)
                 continue
                 
             entry = [float(v) for v in line.split()]
@@ -113,7 +114,7 @@ def compute_poaptdoa(filepath,args,outfile,skip=0,redo=False):
             if frame < 0:
                 continue
             if frame >= FRAMES:
-                print "time", entry[0], ">", TIME_MAX
+                print ("time", entry[0], ">", TIME_MAX)
                 break
             res[frame,:,band,pair] = entry[4:]
             
@@ -137,20 +138,20 @@ def compute_msx(files,args,destdir,mode='msl',redo=False):
                          destfull,redo=redo)
          
 def compute_poapmloc(filepath,args,table,csvpath,npypath,bands=16,redo=False):
-    print table
+    print (table)
     cmd2 = BINPATH + 'poapmloc  ' +args  
     cmd2 += ' ' + filepath
     cmd2 += ' >' + csvpath
     didcompute = False
     if not os.path.exists(csvpath) or redo:
-        print cmd2        
+        print (cmd2)
         if os.system(cmd2) != 0:
             raise RuntimeError()
         didcompute = True
         
     if not export_poapmloc(table,csvpath,npypath,bands):
         if not didcompute:
-            print >>sys.stderr, "Redoing!"
+            print ("Redoing!")
             if os.system(cmd2) != 0:
                 raise RuntimeError()
             return export_poapmloc(table,csvpath,npypath,bands)
@@ -167,7 +168,7 @@ def export_poapmloc(table,csvpath,npypath,bands=16):
         data = readcsv(csvpath)
     except ValueError:
         os.unlink(csvpath)
-        print >>sys.stderr, "File empty or broken", csvpath
+        print ("File empty or broken", csvpath)
         return False
     
     for arrayIndex in range(9):
@@ -180,7 +181,7 @@ def export_poapmloc(table,csvpath,npypath,bands=16):
         nn = np.hstack((frames,times,sdata))
         npfile =_get_npfile(table, csvpath, npypath, arrayIndex)
         np.save(npfile+'.npy',nn)
-        print csvpath,'=>',npfile
+        print (csvpath,'=>',npfile)
     return True
 
 import emtrack
@@ -230,7 +231,7 @@ def compute_em_sub(destfull,
     filepat='msl*'+pattern+'*_a0.npy'
     filez=sorted(glob.glob(destfull+filepat))
     if len(filez)<1:
-        print >>sys.stderr, 'NO FILES IN', destfull,'MATCHING',filepat
+        print ('NO FILES IN', destfull,'MATCHING',filepat)
     
     for filepath0 in filez:
         alldata = np.load(filepath0)
@@ -240,10 +241,10 @@ def compute_em_sub(destfull,
         if suf is not None:
             outpath = outpath.replace('.npy','_'+suf+'.npy')             
         if os.path.exists(outpath) and not redo:
-            print outpath, 'exists, skipped.'
+            print (outpath, 'exists, skipped.')
             continue
         
-        print outpath
+        print (outpath)
         
         for micarray in range(num_arrays):
             filepath = filepath0.replace('_a0.npy','_a'+str(micarray)+'.npy')
@@ -260,7 +261,7 @@ def compute_em_sub(destfull,
             ts = np.floor(ts)
             te = np.ceil(te)
             
-            print filepath,ts,te        
+            print (filepath,ts,te)
             em = emtrack.SpecAngleEM()
             em.setverbousity(0)
             results=[]
@@ -275,21 +276,21 @@ def compute_em_sub(destfull,
                     for x in a:
                         if x.getbands()>bands and x.getv()<24.0 and x.support>support:
                             if n==0:
-                                print "%6.2f %s" % (time, str(x))
+                                print ("%6.2f %s" % (time, str(x)))
                             else:
-                                print "      "+' '+str(x)
+                                print ("      "+' '+str(x))
                             n=n+1                                            
                             results.append(clusteredAngleToRow(int(time*FRAMERATE),time,x))                            
                             
                         elif VERBOSE>2:
-                            print " "*10, "skipped", 
-                            print "%.1f"%x.angle,
-                            print "+-%.1f"%x.getv(),
-                            print "sup",x.support,
-                            print "bands",x.getbands()
+                            print (" "*10, "skipped", 
+                            "%.1f"%x.angle,
+                            "+-%.1f"%x.getv(),
+                            "sup",x.support,
+                            "bands",x.getbands() )
                               
                 if n==0:
-                    print "%6.2f ---" % (time)
+                    print ("%6.2f ---" % (time))
                 
             results=np.array(results)
             np.save(outpath, results)

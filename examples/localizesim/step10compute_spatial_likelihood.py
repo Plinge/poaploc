@@ -3,14 +3,17 @@ Created on 04.02.2018
 
 @author: pli
 '''
+from __future__ import print_function
 import os,sys
 import itertools
 import numpy as np
 import glob
+
+sys.path.append("../python")
+
 import evaldoas
 from paths import make_sure_path_exists
 from tracking import compute_poapmloc
-sys.path.append("../python")
 from config import WORKPATH, TEMPPATH, AUDIOPATH, ARG_GEO
 
 ARG_ALL = '--precision 1 --elevation-precision 5 --min-likelihood 0.01 --skip 3 \
@@ -40,7 +43,7 @@ ARG_CFG = {
     '32b3_g03_m6' : "--bands 32 --post-min-bands 8 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",
     #'16b6_g03_m6' : "--bands 16 --post-min-bands 4 --fmin 300 --fmax 6000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",    
     #'32b6_g03_m6' : "--bands 32 --post-min-bands 8 --fmin 300 --fmax 6000 --gamma 0.3 --spike-mth 6 --spike-ath 0.0",  
-    #'16b3_g03_zc' : "--bands 16 --post-min-bands 4 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mode 3 --spike-ath 0.0",    
+    '16b3_g03_zc' : "--bands 16 --post-min-bands 4 --fmin 300 --fmax 3000 --gamma 0.3 --spike-mode 3 --spike-ath 0.0",    
 }
 
 ARG_POST = {
@@ -53,14 +56,14 @@ make_sure_path_exists(WORKPATH)
 outpath = WORKPATH + '/speechmax/'
 make_sure_path_exists(outpath)
 
-for ((mode,mode_arg),(cfg,cfg_arg),(gain,gain_arg),(post,post_arg)) in itertools.product(ARG_MODE.iteritems(),ARG_CFG.iteritems(),ARG_GAIN.iteritems(),ARG_POST.iteritems()):
+for ((mode,mode_arg),(cfg,cfg_arg),(gain,gain_arg),(post,post_arg)) in itertools.product(ARG_MODE.items(),ARG_CFG.items(),ARG_GAIN.items(),ARG_POST.items()):
     cfgstr = '_'.join((mode, cfg, gain, post))
     prefix = 'msl'
     if 'argmax' in mode_arg:
         prefix = 'msn'    
     filelist = glob.glob(AUDIOPATH+'/sim_c8_speech_*.wav')
     for fileindex,filepath in enumerate(filelist):
-        print 1+fileindex,'/',len(filelist),
+        print (1+fileindex,'/',len(filelist)),
         scenario = os.path.basename(filepath.split('.')[-2])
         compute_poapmloc(filepath,
                          '--quiet ' + ' '.join((ARG_ALL,ARG_GEO,mode_arg,cfg_arg,gain_arg,post_arg)),

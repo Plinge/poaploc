@@ -4,7 +4,7 @@ Created on 21 Feb 2013
 
 @author: aplinge
 '''
-
+from __future__ import print_function
 import math
 import re
 import numpy as np
@@ -178,7 +178,7 @@ class SAGet:
             self.timecol = colnames.index('time')            
         else:
             self.timecol = None
-            print "no time column?"
+            print ("no time column?")
         if 'elevation' in colnames:
             self.elevationcol = colnames.index('elevation')
         else:
@@ -189,7 +189,7 @@ class SAGet:
             self.sncol=self.sncol+1
             if self.sncol+1==len(colnames):
                  break
-        print "%s %d bands" % (table,self.getnbands())         
+        print ("%s %d bands" % (table,self.getnbands()))
 
 
 

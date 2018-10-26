@@ -4,7 +4,7 @@ Created on 21 Feb 2013
 
 @author: aplinge
 '''
-
+from __future__ import print_function
 import math
 import angles 
 import spectra
@@ -120,21 +120,21 @@ class SpecAngleEM:
 
     def printcentroids(self):
         for i in range(0,len(self.densities)):
-            print self.centroid_str(i)
+            print (self.centroid_str(i))
 
     def printem(self):
         pi = np.sum(self.p,1)
         for i in range(0,len(self.densities)):
             p = pi[i]
             if p>0.0:
-                print "%s sum p(%d|x) = %g" % (self.centroid_str(i), i, p)
+                print("%s sum p(%d|x) = %g" % (self.centroid_str(i), i, p))
             else:
-                print "%s sum p(%d|x) = 0!" % (self.centroid_str(i), i)
+                print("%s sum p(%d|x) = 0!" % (self.centroid_str(i), i))
 
     def remove(self,i,quiet=False,reason=""):
         if self.verbouse>0 and not quiet:
-            print "removed class ", i, reason
-            print self.centroid_str(i)
+            print("removed class ", i, reason)
+            print(self.centroid_str(i))
         del self.weight[i]
         del self.densities[i]
         del self.spectra[i]
@@ -264,7 +264,7 @@ class SpecAngleEM:
                 ds = spectra.correlation(self.spectra[i], self.spectra[j])
                 if dd < jointhreshold and ds>mincor:
                     if self.verbouse>0:
-                        print "joined classes d = %f s =%f %s & %s" % (dd, ds,  self.centroid_str(i) ,self.centroid_str(j))
+                        print ("joined classes d = %f s =%f %s & %s" % (dd, ds,  self.centroid_str(i) ,self.centroid_str(j)))
                     self.densities[i].set(angles.average([self.densities[i].mu,self.densities[j].mu]), 0.5*(self.densities[i].var+self.densities[j].var))
                     self.remove(j,True)
                     njoined=njoined+1
@@ -278,7 +278,7 @@ class SpecAngleEM:
         for i in range(0,len(self.densities)):
             if self.densities[i].sigma > splitthreshold: # and self.densities[i].sigma < 180.0:
                 if self.verbouse>0:
-                    print "split class", self.centroid_str(i)
+                    print ("split class", self.centroid_str(i))
                 s1 = self.densities[i].sigma
                 v2 = math.pow(s1,2.0)
                 m1 = angles.make180(self.densities[i].mu - s1)
@@ -292,8 +292,8 @@ class SpecAngleEM:
                 self.energy[i]=self.energy[i]*0.5
                                 
                 if self.verbouse>0:
-                    print "new class", self.centroid_str(i)
-                    print "new class", self.centroid_str(self.getn()-1)
+                    print ("new class", self.centroid_str(i))
+                    print ("new class", self.centroid_str(self.getn()-1))
 
                 nsplit=nsplit+1
                                    
@@ -347,7 +347,7 @@ class SpecAngleEM:
             s = 'data = '
             for x in data:
                 s = s +  ("%.0f (%.1f) " % (x.angle, x.getsum()))
-            print s
+            print(s)
             
         while True:
             change = self.fitstep(data,it,change,threshold,delthreshold,splitthreshold,jointhreshold,maxiter,miniter)            
@@ -358,9 +358,9 @@ class SpecAngleEM:
             if it>maxiter:
                 break       
             if self.verbouse>2:
-                print "%d iterations, change=%d, like = %g" % (it, change, self.like)
+                print ("%d iterations, change=%d, like = %g" % (it, change, self.like))
             if self.verbouse>0 and self.verbouse<=2 and change>0:            
-                print "%d iterations, change=%d, like = %g" % (it, change, self.like)
+                print ("%d iterations, change=%d, like = %g" % (it, change, self.like))
             if self.verbouse>0 and self.verbouse<=2 and change>0:
                 self.printem()                                    
             if change>0:
@@ -369,7 +369,7 @@ class SpecAngleEM:
         # loop done     
                    
         if self.verbouse>1:
-            print "%d iterations, like = %g" % (it, self.like)
+            print("%d iterations, like = %g" % (it, self.like))
             self.printem()
             
         return self.like

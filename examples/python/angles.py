@@ -5,7 +5,7 @@ Created on 21 Feb 2013
 @author: aplinge
 '''
 
-
+from __future__ import print_function
 import math
 import numpy as np
 import itertools
@@ -52,7 +52,7 @@ def average(a):
             ma = x
         n=n+1
     if n<1:
-        print "list is empty"
+        print ("list is empty")
         return 0.0
     s = 0.0
     if (mi < -90 and ma > 90):
@@ -82,7 +82,7 @@ def weightedAverage(a,p):
             ma = x
         n=n+1
     if n<1:
-        print "list is empty"
+        print ("list is empty")
         return 0.0
     s = 0.0
     n = 0.0
@@ -165,7 +165,7 @@ class NormalDevAngles:
             if n>0:
                 v = v / n
             else:
-                print "zero zum"
+                print ("zero zum")
         else:
             for x in a:
                 v = v + math.pow(difference(x, s), 2.0)
@@ -188,7 +188,7 @@ class NormalDevAngles:
             if n>0:
                 v = v / n
             else:
-                print "zero zum"
+                print ("zero zum")
         else:
             for x in a:
                 v = v + math.pow(difference(x, self.mu), 2.0)
@@ -203,5 +203,5 @@ if __name__ == '__main__':
         b = random.uniform(-720,720)
         x = make360(a-b+180) - 180 
         y = make180(a-b)
-        print a,b, x,y
+        print (a,b, x,y)
         

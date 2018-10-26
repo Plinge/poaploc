@@ -3,6 +3,7 @@ Created on 04.02.2018
 
 @author: pli
 '''
+from __future__ import print_function
 import itertools
 import numpy as np
 import angles
@@ -54,7 +55,7 @@ def eval_static_doas(adata,framecount,gt,thres=15):
         framecount = int(np.max(adata[:,0]))
     fp=0;tp=0;fn=0;tn=0
     alldists = []
-    for frame in xrange(framecount):        
+    for frame in range(framecount):        
         lo = adata[adata[:,0]==frame]
         lo = lo[:,2]
         #print frame,  gt, lo,
@@ -69,7 +70,7 @@ def eval_static_doas(adata,framecount,gt,thres=15):
             else:
                 _,dists,_,_ = angles_min_dist_permutation(gt, lo)
                 alldists.extend(dists)
-                tt = len(filter(lambda x:x<=thres, dists))
+                tt = len([filter(lambda x:x<=thres, dists)])
                 tp = tp + tt
                 fp = fp + len(dists)-tt
                 fn = fn + len(gt)-tt
@@ -101,12 +102,12 @@ def eval_static_doas_windowed(adata,gt,maxtime,win=0.5,step=None,start=0.0,thres
             else:
                 fp=fp+len(lo)
                 if verbose:        
-                    print t, gt, lo,'FP'
+                    print (t, gt, lo,'FP')
         else:
             if len(lo)==0:
                 fn += len(gt)
                 if verbose:
-                    print t, gt, lo,'FN'
+                    print (t, gt, lo,'FN')
             else:
                 _,dists,_,_ = angles_min_dist_permutation(gt, lo)
                 alldists.extend(dists)
@@ -116,11 +117,11 @@ def eval_static_doas_windowed(adata,gt,maxtime,win=0.5,step=None,start=0.0,thres
                 fn = fn + len(gt)-tt
                 if len(gt)!=tt:
                     if verbose:
-                        print t,gt, lo,'FN'
+                        print (t,gt, lo,'FN')
                 if len(lo)>len(gt):
                     fp = fp + len(lo)-len(gt)
                     if verbose:
-                        print t,gt, lo,'FP'
+                        print (t,gt, lo,'FP')
 
     stats = _get_allstats(tp,fp,tn,fn)
     stats['err'], stats['std'] = np.mean(alldists), np.std(alldists)

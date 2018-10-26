@@ -4,7 +4,8 @@ Created on 18.02.2018
 @author: pli
 '''
 import h5py
-import glob, os
+import glob, os, sys
+sys.path.append('../python')
 import numpy as np
 from config import DOA_RESOLUTION, AUDIOPATH, CNNINPUTPATH
 from angles import make360
@@ -34,17 +35,17 @@ def exportconc(files):
                 s = np.angle(s[:256],False)
                 phases.append(s)
             test_x.append(phases)
-            
-        test_x = np.transpose( np.array(test_x,dtype=np.float16), [0,2,1])
+        
+        test_x = np.transpose(np.array(test_x,dtype=np.float16), [0,2,1])
         test_x = test_x.reshape(-1,256,8,1)
         #test_x = np.load(filepath)        
         doaa = os.path.basename(filepath).split('_')[4]
         doa  = int(doaa[1:])
       
         pairx.append(test_x)      
-        pairy.append(int( make360(doa+0.5*DOA_RESOLUTION))/DOA_RESOLUTION)                 
+        pairy.append(int(make360(doa+0.5*DOA_RESOLUTION)/DOA_RESOLUTION)) 
             
-        if len(pairy)==2:
+        if len(pairy)==2:            
             pairx  = np.vstack(pairx)
             datalen = pairx.shape[0]
             shuf = list(range(datalen))
@@ -55,7 +56,7 @@ def exportconc(files):
                     pairx[:,k,m,0] = fres
             testxx.append(pairx)
             
-            test_y = np.zeros((datalen,360/DOA_RESOLUTION),dtype=np.int8) 
+            test_y = np.zeros((datalen,int(360/DOA_RESOLUTION)),dtype=np.int8) 
             test_y[:, pairy[0]] = 1
             test_y[:, pairy[1]] = 1
             testyy.append(test_y)
@@ -73,22 +74,21 @@ def exportconc(files):
     #print testxx.shape , '->', testyy.shape           
     return testxx, testyy
 
-def exportruns(runs):
-    print 'gathering...'    
+def exportruns(runs,stype='noise'):
+    print('gathering...')
     xx,yy=[],[]
     for run,t60 in itertools.product(runs,(15,30,45,60,40,50)):        
-        pat = AUDIOPATH + 'sim_c8_noise*_t'+('%03d'%t60)+'_*_r'+('%02d'% run)+'.wav' 
+        pat = AUDIOPATH + 'sim_c8_'+stype+'*_t'+('%03d'%t60)+'_*_r'+('%02d'% run)+'.wav' 
         files = glob.glob(pat)
         if len(files)<1:
             continue
-        print ('%4d'%len(files)),'for',pat        
+        print(('%4d'%len(files)),'for',pat)
         np.random.shuffle(files)
         x,y = exportconc(files)
         xx.append(x);yy.append(y)
         
     xx,yy = np.vstack(xx),np.vstack(yy)
-    print
-    print xx.shape , '->', yy.shape    
+    print (xx.shape , '->', yy.shape)
     return xx, yy
        
 def exportfull():
@@ -98,7 +98,7 @@ def exportfull():
     #trainruns += list(range(40,60))
     trainruns  = list(range(50,60))        
     validruns = list(range(35,40))
-    testruns = list(range(18,24))
+    testruns = list(range(30,35))
         
     outfile = CNNINPUTPATH + '/noise_circ_conc_phase'+'.hdf5' 
     with h5py.File( outfile, "w") as f:        
@@ -112,14 +112,16 @@ def exportfull():
         f.create_dataset('Y_valid', data=y, dtype=np.int8)
         valid_shape = x.shape
         
-        x,y = exportruns(testruns)
+        x,y = exportruns(testruns,'speech')
         f.create_dataset('X_test', data=x, dtype=np.float16)
         f.create_dataset('Y_test', data=y, dtype=np.int8)
         test_shape = x.shape
                 
-        print 'train', train_shape
-        print 'valid', valid_shape
-        print 'test ', test_shape
-    print outfile
+        print('train', train_shape)
+        print('valid', valid_shape)
+        print('test ', test_shape)
+    print(outfile)
 
+print("DOA qunatized to ", DOA_RESOLUTION)
+  
 exportfull()
