@@ -3,7 +3,7 @@ Created on 18.02.2018
 
 @author: pli
 '''
-import h5py
+import h5py, tables
 import glob, os, sys
 sys.path.append('../python')
 import numpy as np
@@ -94,34 +94,39 @@ def exportruns(runs,stype='noise'):
 def exportfull():
     global themax  
     themax = []
-    #trainruns  = list(range(30,35))        
-    #trainruns += list(range(40,60))
-    trainruns  = list(range(50,60))        
+    trainruns  = list(range(40,60))        
     validruns = list(range(35,40))
     testruns = list(range(30,35))
         
     outfile = CNNINPUTPATH + '/noise_circ_conc_phase'+'.hdf5' 
-    with h5py.File( outfile, "w") as f:        
-        x,y = exportruns(trainruns)            
-        f.create_dataset('X_train', data=x, dtype=np.float16)
-        f.create_dataset('Y_train', data=y, dtype=np.int8)
-        train_shape = x.shape
+    #with h5py.File( outfile, "w") as f:
+    with tables.open_file(outfile, mode="w") as f:
+        xa = f.create_earray(f.root,'X_train', tables.Atom.from_dtype(np.dtype('float16')),(0, 256, 8, 1))
+        ya = f.create_earray(f.root,'Y_train', tables.Atom.from_dtype(np.dtype('int8')),(0,int(360/DOA_RESOLUTION)))       
+        for run in trainruns:            
+            x,y = exportruns([run,])
+            xa.append(x)
+            ya.append(y)
+            print (xa.shape,'->',ya.shape)        
+        train_shape = xa.shape
         
         x,y = exportruns(validruns)
-        f.create_dataset('X_valid', data=x, dtype=np.float16)
-        f.create_dataset('Y_valid', data=y, dtype=np.int8)
+        f.create_array(f.root,'X_valid', x.astype(np.float16))
+        f.create_array(f.root,'Y_valid', y.astype(np.int8))
         valid_shape = x.shape
         
+        
         x,y = exportruns(testruns,'speech')
-        f.create_dataset('X_test', data=x, dtype=np.float16)
-        f.create_dataset('Y_test', data=y, dtype=np.int8)
+        f.create_array(f.root,'X_test', x.astype(np.float16))
+        f.create_array(f.root,'Y_test', y.astype(np.int8))
         test_shape = x.shape
                 
-        print('train', train_shape)
+        #print('train', train_shape)
         print('valid', valid_shape)
         print('test ', test_shape)
+        
     print(outfile)
 
-print("DOA qunatized to ", DOA_RESOLUTION)
+print("DOA quantized to ", DOA_RESOLUTION)
   
 exportfull()
